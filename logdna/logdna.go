@@ -34,7 +34,7 @@ func init() {
     r := &router.Route{
         Adapter:        adapter,
 //        FilterID:       filterID,
-        FilterName:     filterName,
+//        FilterName:     filterName,
 //        FilterNames:    filterNames,
 //        FilterSources:  filterSources,
 //        FilterLabels:   filterLabels,
