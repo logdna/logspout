@@ -2,6 +2,7 @@ package logdna
 
 import (
     "errors"
+    "strings"
     "log"
     "os"
 
@@ -27,6 +28,8 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
     token := os.Getenv("LOGDNA_KEY")
     tags := os.Getenv("TAGS")
     hostname := os.Getenv("HOSTNAME")
+    included := os.Getenv("INCLUDE")
+    excluded := os.Getenv("EXCLUDE")
 
     if endpoint == "" {
         endpoint = "logs.logdna.com/logs/ingest"
@@ -48,11 +51,25 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         custom_hostname = false
     }
 
+    if included == "" {
+        included = []
+    } else {
+        included = strings.Split(included, ",")
+    }
+
+    if excluded == "" {
+        excluded = []
+    } else {
+        excluded = strings.Split(excluded, ",")
+    }
+
     return adapter.New(
         endpoint,
         token,
         tags,
         hostname,
         custom_hostname,
+        included,
+        excluded,
     ), nil
 }

@@ -48,12 +48,14 @@ type ContainerConfig struct {
     Labels      map[string]string   `json:"labels"`
 }
 
-func New(baseURL string, logdnaToken string, tags string, hostname string, custom_hostname bool) *Adapter {
+func New(baseURL string, logdnaToken string, tags string, hostname string, custom_hostname bool, included []string, excluded []string) *Adapter {
     adapter := &Adapter{
         log:                log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
         logdnaURL:          buildLogDNAURL(baseURL, logdnaToken, tags, hostname),
         queue:              make(chan Line),
         custom_hostname:    custom_hostname,
+        included:           included,
+        excluded:           excluded,
     }
 
     go adapter.readQueue()
@@ -61,8 +63,14 @@ func New(baseURL string, logdnaToken string, tags string, hostname string, custo
     return adapter
 }
 
+func (l *Adapter) checkContainer(string name) {
+
+}
+
 func (l *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
+        container_name := m.Container.Name
+        if ()
         messageStr, err := json.Marshal(Message{
             Message:    m.Data,
             Container:  ContainerInfo{
