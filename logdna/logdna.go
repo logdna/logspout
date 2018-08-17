@@ -38,12 +38,14 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         )
     }
 
+    custom_hostname := true
     if hostname == "" {
         host, err := os.Hostname()
         if err != nil {
             log.Fatal(err.Error())
         }
         hostname = host
+        custom_hostname = false
     }
 
     return adapter.New(
@@ -51,5 +53,6 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         token,
         tags,
         hostname,
+        custom_hostname,
     ), nil
 }

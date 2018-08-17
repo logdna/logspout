@@ -33,6 +33,7 @@ type Line struct {
 type Message struct {
     Message     string        `json:"message"`
     Container   ContainerInfo `json:"container"`
+    CHostname   bool          `json:"custom_hostname"`
 }
 
 type ContainerInfo struct {
@@ -47,11 +48,12 @@ type ContainerConfig struct {
     Labels      map[string]string   `json:"labels"`
 }
 
-func New(baseURL string, logdnaToken string, tags string, hostname string) *Adapter {
+func New(baseURL string, logdnaToken string, tags string, hostname string, custom_hostname bool) *Adapter {
     adapter := &Adapter{
-        log:        log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
-        logdnaURL:  buildLogDNAURL(baseURL, logdnaToken, tags, hostname),
-        queue:      make(chan Line),
+        log:                log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
+        logdnaURL:          buildLogDNAURL(baseURL, logdnaToken, tags, hostname),
+        queue:              make(chan Line),
+        custom_hostname:    custom_hostname,
     }
 
     go adapter.readQueue()
@@ -72,6 +74,7 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
                     Labels:     m.Container.Config.Labels,
                 },
             },
+            CHostname:  l.custom_hostname,
         })
         if err != nil {
             log.Fatal(err.Error())
