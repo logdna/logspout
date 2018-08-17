@@ -65,14 +65,8 @@ func (l *Adapter) getLevel(source string) {
     return "ERROR"
 }
 
-func (l *Adapter) checkContainer(string name) {
-
-}
-
 func (l *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
-        container_name := m.Container.Name
-        if ()
         messageStr, err := json.Marshal(Message{
             Message:    m.Data,
             Container:  ContainerInfo{
