@@ -33,11 +33,11 @@ func init() {
 
     r := &router.Route{
         Adapter:        adapter,
-        FilterID:       filterID,
+//        FilterID:       filterID,
         FilterName:     filterName,
-        FilterNames:    filterNames,
-        FilterSources:  filterSources,
-        FilterLabels:   filterLabels,
+//        FilterNames:    filterNames,
+//        FilterSources:  filterSources,
+//        FilterLabels:   filterLabels,
     }
 
     err := router.Routes.Add(r)
