@@ -2,7 +2,6 @@ package logdna
 
 import (
     "errors"
-    "strings"
     "log"
     "os"
 
@@ -27,9 +26,9 @@ func init() {
 
     filterID := os.Getenv(filterIDVar)
     filterName := os.Getenv(filterNameVar)
-    filterNames := os.Getenv(filterNamesVar)
-    filterSources := os.Getenv(filterSourcesVar)
-    filterLabels := os.Getenv(filterLabelsVar)
+    filterNames := strings.Split(os.Getenv(filterNamesVar), ",")
+    filterSources := strings.Split(os.Getenv(filterSourcesVar), ",")
+    filterLabels := strings.Split(os.Getenv(filterLabelsVar), ",")
 
     r := &router.Route{
         Adapter:        adapter,
