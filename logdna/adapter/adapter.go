@@ -55,6 +55,8 @@ func New(baseURL string, logdnaToken string, tags string) *Adapter {
         queue:      make(chan Line),
     }
 
+    log.Println(adapter)
+
     go adapter.readQueue()
 
     return adapter
@@ -65,6 +67,7 @@ func (l *Adapter) getLevel(source string) string {
     if (source == "stdout") {
         level = "INFO"
     }
+    log.Println(level)
     return level
 }
 

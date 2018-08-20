@@ -41,6 +41,8 @@ func init() {
         FilterLabels:   filterLabels,
     }
 
+    log.Println(r)
+
     err := router.Routes.Add(r)
     if err != nil {
         log.Fatal("could not add route: ", err.Error())
