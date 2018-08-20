@@ -56,9 +56,8 @@ func New(baseURL string, logdnaToken string, tags string) *Adapter {
     }
 
     log.Println(adapter)
-
     go adapter.readQueue()
-
+    log.Println(adapter)
     return adapter
 }
 
@@ -103,7 +102,8 @@ func (l *Adapter) readQueue() {
 
     buffer := l.newBuffer()
     timeout := time.NewTimer(flushTimeout)
-
+    log.Println(buffer)
+    log.Println(timeout)
     for {
         select {
         case msg := <-l.queue:
