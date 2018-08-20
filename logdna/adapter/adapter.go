@@ -50,9 +50,9 @@ type ContainerConfig struct {
 
 func New(baseURL string, logdnaToken string, tags string) *Adapter {
     adapter := &Adapter{
-        log:                log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
-        logdnaURL:          buildLogDNAURL(baseURL, logdnaToken, tags),
-        queue:              make(chan Line),
+        log:        log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
+        logdnaURL:  buildLogDNAURL(baseURL, logdnaToken, tags),
+        queue:      make(chan Line),
     }
 
     go adapter.readQueue()

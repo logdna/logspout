@@ -11,7 +11,6 @@ import (
 )
 
 const (
-    adapter             = "logdna"
     endpointVar         = "LOGDNA_URL"
     tokenVar            = "LOGDNA_KEY"
     tagsVar             = "TAGS"
@@ -23,7 +22,7 @@ const (
 )
 
 func init() {
-    router.AdapterFactories.Register(NewLogDNAAdapter, adapter)
+    router.AdapterFactories.Register(NewLogDNAAdapter, "logdna")
 
     filterID := os.Getenv(filterIDVar)
     filterName := os.Getenv(filterNameVar)
@@ -32,7 +31,7 @@ func init() {
     filterLabels := strings.Split(os.Getenv(filterLabelsVar), ",")
 
     r := &router.Route{
-        Adapter:        adapter,
+        Adapter:        "logdna",
         FilterID:       filterID,
         FilterName:     filterName,
         FilterNames:    filterNames,
