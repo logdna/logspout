@@ -6,7 +6,14 @@ import (
     "os"
 
     "github.com/gliderlabs/logspout/router"
-    "github.com/smusali/logspout/logdna/adapter"
+    "github.com/logdna/logspout/logdna/adapter"
+)
+
+const (
+    endpointVar         = "LOGDNA_URL"
+    tokenVar            = "LOGDNA_KEY"
+    tagsVar             = "TAGS"
+    filterNameVar       = "FILTER_NAME"
 )
 
 func init() {
@@ -14,6 +21,7 @@ func init() {
 
     r := &router.Route{
         Adapter:    "logdna",
+        FilterName: os.Getenv(filterNameVar),
     }
 
     err := router.Routes.Add(r)
@@ -23,10 +31,9 @@ func init() {
 }
 
 func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
-    endpoint := os.Getenv("LOGDNA_URL")
-    token := os.Getenv("LOGDNA_KEY")
-    tags := os.Getenv("TAGS")
-    hostname := os.Getenv("HOSTNAME")
+    endpoint := os.Getenv(endpointVar)
+    token := os.Getenv(tokenVar)
+    tags := os.Getenv(tagsVar)
 
     if endpoint == "" {
         endpoint = "logs.logdna.com/logs/ingest"
@@ -38,18 +45,9 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         )
     }
 
-    if hostname == "" {
-        host, err := os.Hostname()
-        if err != nil {
-            log.Fatal(err.Error())
-        }
-        hostname = host
-    }
-
     return adapter.New(
         endpoint,
         token,
         tags,
-        hostname,
     ), nil
 }
