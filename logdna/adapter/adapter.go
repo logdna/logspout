@@ -82,7 +82,6 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
             },
             Level:      l.getLevel(m.Source),
         })
-        log.Println(messageStr)
         if err != nil {
             log.Println("Error in Marshalling")
             log.Fatal(err.Error())
@@ -134,6 +133,7 @@ func (l *Adapter) flushBuffer(buffer []Line) {
         Lines: buffer,
     }
 
+    log.Println(body)
     json.NewEncoder(&data).Encode(body)
     resp, err := http.Post(l.logdnaURL, "application/json; charset=UTF-8", &data)
     log.Println(resp.StatusCode)
