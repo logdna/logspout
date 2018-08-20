@@ -35,10 +35,10 @@ func init() {
 
     r := &router.Route{
         Adapter:        "logdna",
-        FilterID:       filterID,
-        FilterName:     filterName,
-        FilterSources:  filterSources,
-        FilterLabels:   filterLabels,
+//        FilterID:       filterID,
+//        FilterName:     filterName,
+//        FilterSources:  filterSources,
+//        FilterLabels:   filterLabels,
     }
 
     log.Println(r)
