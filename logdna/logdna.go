@@ -2,7 +2,7 @@ package logdna
 
 import (
     "errors"
-    "strings"
+//    "strings"
     "log"
     "os"
 
