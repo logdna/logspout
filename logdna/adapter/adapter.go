@@ -60,7 +60,7 @@ func New(baseURL string, logdnaToken string, tags string) *Adapter {
     return adapter
 }
 
-func (l *Adapter) getLevel(source string) {
+func (l *Adapter) getLevel(source string) string {
     level := "ERROR"
     if (source == "stdout") {
         level = "INFO"
