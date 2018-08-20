@@ -72,7 +72,7 @@ func (l *Adapter) getLevel(source string) string {
 
 func (l *Adapter) Stream(logstream chan *router.Message) {
     log.Println("LogStream:")
-    log.Println(*logstream)
+    log.Println(logstream)
     for m := range logstream {
         log.Println("Message:")
         log.Println(m)
