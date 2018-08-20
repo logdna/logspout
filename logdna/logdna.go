@@ -16,7 +16,6 @@ const (
     tagsVar             = "TAGS"
     filterIDVar         = "FILTER_ID"
     filterNameVar       = "FILTER_NAME"
-    filterNamesVar      = "FILTER_NAMES"
     filterSourcesVar    = "FILTER_SOURCES"
     filterLabelsVar     = "FILTER_LABELS"
 )
@@ -26,7 +25,6 @@ func init() {
 
     filterID := os.Getenv(filterIDVar)
     filterName := os.Getenv(filterNameVar)
-    filterNames := strings.Split(os.Getenv(filterNamesVar), ",")
     filterSources := strings.Split(os.Getenv(filterSourcesVar), ",")
     filterLabels := strings.Split(os.Getenv(filterLabelsVar), ",")
 
@@ -34,7 +32,6 @@ func init() {
         Adapter:        "logdna",
         FilterID:       filterID,
         FilterName:     filterName,
-        FilterNames:    filterNames,
         FilterSources:  filterSources,
         FilterLabels:   filterLabels,
     }
