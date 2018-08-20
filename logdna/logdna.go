@@ -10,7 +10,7 @@ import (
     "github.com/smusali/logspout/logdna/adapter"
 )
 
-const {
+const (
     adapter             = "logdna"
     endpointVar         = "LOGDNA_URL"
     tokenVar            = "LOGDNA_KEY"
@@ -20,7 +20,7 @@ const {
     filterNamesVar      = "FILTER_NAMES"
     filterSourcesVar    = "FILTER_SOURCES"
     filterLabelsVar     = "FILTER_LABELS"
-}
+)
 
 func init() {
     router.AdapterFactories.Register(NewLogDNAAdapter, adapter)
