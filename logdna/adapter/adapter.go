@@ -61,11 +61,11 @@ func New(baseURL string, logdnaToken string, tags string) *Adapter {
 }
 
 func (l *Adapter) getLevel(source string) {
+    level := "ERROR"
     if (source == "stdout") {
-        return "INFO"
-    } else {
-        return "ERROR"
+        level = "INFO"
     }
+    return level
 }
 
 func (l *Adapter) Stream(logstream chan *router.Message) {
