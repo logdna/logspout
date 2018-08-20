@@ -13,7 +13,6 @@ const (
     endpointVar         = "LOGDNA_URL"
     tokenVar            = "LOGDNA_KEY"
     tagsVar             = "TAGS"
-    filterIDVar         = "FILTER_ID"
     filterNameVar       = "FILTER_NAME"
 )
 
@@ -22,8 +21,7 @@ func init() {
 
     r := &router.Route{
         Adapter:    "logdna",
-        FilterID:   os.Getenv(filterIDVar),
-        FilterName: os.Getenv(filterNameVar)
+        FilterName: os.Getenv(filterNameVar),
     }
 
     err := router.Routes.Add(r)
