@@ -81,7 +81,7 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
                     Labels:     m.Container.Config.Labels,
                 },
             },
-            Level:      l.getLevel(m.Source)
+            Level:      l.getLevel(m.Source),
         })
         if err != nil {
             log.Fatal(err.Error())
