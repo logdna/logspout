@@ -55,9 +55,9 @@ func New(baseURL string, logdnaToken string, tags string) *Adapter {
         queue:      make(chan Line),
     }
 
-    log.Println(adapter)
+    log.Println(&adapter)
     go adapter.readQueue()
-    log.Println(adapter)
+    log.Println(&adapter)
     return adapter
 }
 
@@ -71,7 +71,7 @@ func (l *Adapter) getLevel(source string) string {
 }
 
 func (l *Adapter) Stream(logstream chan *router.Message) {
-    log.Println(logstream)
+    log.Println(&logstream)
     for m := range logstream {
         log.Println(m)
         messageStr, err := json.Marshal(Message{
@@ -103,8 +103,8 @@ func (l *Adapter) readQueue() {
 
     buffer := l.newBuffer()
     timeout := time.NewTimer(flushTimeout)
-    log.Println(buffer)
-    log.Println(timeout)
+    log.Println(&buffer)
+    log.Println(&timeout)
     for {
         select {
         case msg := <-l.queue:
