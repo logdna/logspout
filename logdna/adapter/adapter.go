@@ -134,13 +134,13 @@ func (l *Adapter) flushBuffer(buffer []Line) {
         Lines: buffer,
     }
 
-    fmt.Println(body)
+    l.log.Println(body)
 
     json.NewEncoder(&data).Encode(body)
     resp, err := http.Post(l.logdnaURL, "application/json; charset=UTF-8", &data)
 
-    fmt.Println(resp)
-    fmt.Println(resp.StatusCode)
+    l.log.Println(resp)
+    l.log.Println(resp.StatusCode)
 
     if resp != nil {
         defer resp.Body.Close()
