@@ -64,7 +64,6 @@ func (l *Adapter) getLevel(source string) string {
     if (source == "stdout") {
         level = "INFO"
     }
-    log.Println(level)
     return level
 }
 
@@ -83,7 +82,9 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
             },
             Level:      l.getLevel(m.Source),
         })
+        log.Println(messageStr)
         if err != nil {
+            log.Println("Error in Marshalling")
             log.Fatal(err.Error())
         }
         l.queue <- Line{
