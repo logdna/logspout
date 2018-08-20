@@ -28,10 +28,10 @@ func init() {
     filterSources := strings.Split(os.Getenv(filterSourcesVar), ",")
     filterLabels := strings.Split(os.Getenv(filterLabelsVar), ",")
 
-    log.Println(filterID)
-    log.Println(filterName)
-    log.Println(filterSources)
-    log.Println(filterLabels)
+//    log.Println(filterID)
+//    log.Println(filterName)
+//    log.Println(filterSources)
+//    log.Println(filterLabels)
 
     r := &router.Route{
         Adapter:        "logdna",
@@ -41,7 +41,7 @@ func init() {
 //        FilterLabels:   filterLabels,
     }
 
-    log.Println(r)
+//    log.Println(r)
 
     err := router.Routes.Add(r)
     if err != nil {
