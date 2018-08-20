@@ -71,6 +71,7 @@ func (l *Adapter) getLevel(source string) string {
 }
 
 func (l *Adapter) Stream(logstream chan *router.Message) {
+    log.Println(logstream)
     for m := range logstream {
         log.Println(m)
         messageStr, err := json.Marshal(Message{
