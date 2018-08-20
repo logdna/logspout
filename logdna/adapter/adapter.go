@@ -83,7 +83,6 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
             Level:      l.getLevel(m.Source),
         })
         if err != nil {
-            log.Println("Error in Marshalling")
             log.Fatal(err.Error())
         }
         l.queue <- Line{
@@ -133,10 +132,8 @@ func (l *Adapter) flushBuffer(buffer []Line) {
         Lines: buffer,
     }
 
-    log.Println(body)
     json.NewEncoder(&data).Encode(body)
     resp, err := http.Post(l.logdnaURL, "application/json; charset=UTF-8", &data)
-    log.Println(resp.StatusCode)
 
     if resp != nil {
         defer resp.Body.Close()
@@ -168,7 +165,7 @@ func buildLogDNAURL(baseURL, token string, tags string) string {
     v := url.Values{}
     v.Add("tags", tags)
     v.Add("apikey", token)
-    v.Add("hostname", "docker")
+    v.Add("hostname", "logdna_docker_logspout")
 
     ldna_url := "https://" + baseURL + "?" + v.Encode()
 
