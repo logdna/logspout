@@ -50,7 +50,7 @@ type ContainerConfig struct {
     Labels      map[string]string   `json:"labels"`
 }
 
-func New(baseURL string, logdnaToken string, tags string, hostname string) *Adapter {
+func New(baseURL string, logdnaToken string, tags string) *Adapter {
     adapter := &Adapter{
         log:        log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
         logdnaURL:  buildLogDNAURL(baseURL, logdnaToken, tags),
