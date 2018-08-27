@@ -86,6 +86,8 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
             Level:      l.getLevel(m.Source),
             Hostname:   l.host,
         })
+        fmt.Println(messageStr)
+        fmt.Println(err)
         if err != nil {
             log.Fatal(err.Error())
         }
@@ -138,8 +140,8 @@ func (l *Adapter) flushBuffer(buffer []Line) {
 
     json.NewEncoder(&data).Encode(body)
     resp, err := http.Post(l.logdnaURL, "application/json; charset=UTF-8", &data)
-    l.log.Println(resp)
-    l.log.Println(err)
+    fmt.Println(resp)
+    fmt.Println(err)
 
     if resp != nil {
         defer resp.Body.Close()
