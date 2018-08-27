@@ -57,7 +57,7 @@ func New(baseURL string, logdnaToken string, tags string, hostname string) *Adap
         queue:      make(chan Line),
         host:       hostname,
     }
-
+    fmt.Println(adapter)
     go adapter.readQueue()
     return adapter
 }
@@ -80,6 +80,8 @@ func (l *Adapter) getHost(container_hostname string) string {
 
 func (l *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
+        fmt.Println(l.getHost(m.Container.Config.Hostname))
+        fmt.Println(l.getLevel(m.Source))
         messageStr, err := json.Marshal(Message{
             Message:    m.Data,
             Container:  ContainerInfo{
