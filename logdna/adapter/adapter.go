@@ -79,8 +79,6 @@ func (l *Adapter) getHost(container_hostname string) string {
 
 func (l *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
-        fmt.Println(l.getHost(m.Container.Config.Hostname))
-        fmt.Println(l.getLevel(m.Source))
         messageStr, err := json.Marshal(Message{
             Message:    m.Data,
             Container:  ContainerInfo{
@@ -95,7 +93,6 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
             Level:      l.getLevel(m.Source),
             Hostname:   l.getHost(m.Container.Config.Hostname),
         })
-        fmt.Println(err)
         if err != nil {
             log.Fatal(err.Error())
         }
@@ -148,8 +145,6 @@ func (l *Adapter) flushBuffer(buffer []Line) {
 
     json.NewEncoder(&data).Encode(body)
     resp, err := http.Post(l.logdnaURL, "application/json; charset=UTF-8", &data)
-    fmt.Println(resp)
-    fmt.Println(err)
 
     if resp != nil {
         defer resp.Body.Close()
