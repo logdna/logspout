@@ -57,9 +57,7 @@ func New(baseURL string, logdnaToken string, tags string, hostname string) *Adap
         queue:      make(chan Line),
         host:       hostname,
     }
-    fmt.Println(adapter)
     go adapter.readQueue()
-    fmt.Println(adapter)
     return adapter
 }
 
@@ -97,7 +95,6 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
             Level:      l.getLevel(m.Source),
             Hostname:   l.getHost(m.Container.Config.Hostname),
         })
-        fmt.Println(messageStr)
         fmt.Println(err)
         if err != nil {
             log.Fatal(err.Error())
@@ -114,8 +111,6 @@ func (l *Adapter) readQueue() {
 
     buffer := l.newBuffer()
     timeout := time.NewTimer(flushTimeout)
-    fmt.Println(buffer)
-    fmt.Println(timeout)
     for {
         select {
         case msg := <-l.queue:
@@ -126,8 +121,6 @@ func (l *Adapter) readQueue() {
             }
 
             buffer = append(buffer, msg)
-            fmt.Println(buffer)
-            fmt.Println(msg)
 
         case <-timeout.C:
             if len(buffer) > 0 {
