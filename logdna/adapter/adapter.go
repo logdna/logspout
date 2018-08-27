@@ -94,7 +94,7 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
             Level:      l.getLevel(m.Source),
             Hostname:   l.getHost(m.Container.Config.Hostname),
         })
-        fmt.Println(l.host)
+        fmt.Println(messageStr)
         fmt.Println(err)
         if err != nil {
             log.Fatal(err.Error())
