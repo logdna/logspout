@@ -7,7 +7,14 @@ import (
     "strings"
 
     "github.com/gliderlabs/logspout/router"
-    "github.com/smusali/logspout/logdna/adapter"
+    "github.com/logdna/logspout/logdna/adapter"
+)
+
+const (
+    endpointVar         = "LOGDNA_URL"
+    tokenVar            = "LOGDNA_KEY"
+    tagsVar             = "TAGS"
+    filterNameVar       = "FILTER_NAME"
 )
 
 const (
