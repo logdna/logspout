@@ -24,12 +24,29 @@ const (
 func init() {
     router.AdapterFactories.Register(NewLogDNAAdapter, "logdna")
 
+    filter_labels := os.Getenv(filterLabelsVar)
+    if filter_labels == "" {
+        filter_labels = []
+    } else {
+        filter_labels = strings.Split(filter_labels, ",")
+    }
+
+    filter_sources := os.Getenv(filterSourcesVar)
+    if filter_sources == "" {
+        filter_sources = []
+    } else {
+        filter_sources = strings.Split(filter_sources, ",")
+    }
+
+    filter_id := os.Getenv(filterIDVar)
+    filter_name := os.Getenv(filterNameVar)
+
     r := &router.Route{
         Adapter:        "logdna",
-        FilterName:     os.Getenv(filterNameVar),
-        FilterID:       os.Getenv(filterIDVar),
-        FilterLabels:   strings.Split(os.Getenv(filterLabelsVar), ","),
-        FilterSources:  strings.Split(os.Getenv(filterSourcesVar), ","),
+        FilterName:     filter_name,
+        FilterID:       filter_id,
+        FilterLabels:   filter_labels,
+        FilterSources:  filter_sources,
     }
 
     err := router.Routes.Add(r)
