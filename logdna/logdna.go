@@ -14,13 +14,6 @@ const (
     endpointVar         = "LOGDNA_URL"
     tokenVar            = "LOGDNA_KEY"
     tagsVar             = "TAGS"
-    filterNameVar       = "FILTER_NAME"
-)
-
-const (
-    endpointVar         = "LOGDNA_URL"
-    tokenVar            = "LOGDNA_KEY"
-    tagsVar             = "TAGS"
     hostVar             = "HOSTNAME"
     filterNameVar       = "FILTER_NAME"
     filterIDVar         = "FILTER_ID"
@@ -33,14 +26,14 @@ func init() {
 
     filter_labels := os.Getenv(filterLabelsVar)
     if filter_labels == "" {
-        filter_labels = []
+        filter_labels = []string
     } else {
         filter_labels = strings.Split(filter_labels, ",")
     }
 
     filter_sources := os.Getenv(filterSourcesVar)
     if filter_sources == "" {
-        filter_sources = []
+        filter_sources = []string
     } else {
         filter_sources = strings.Split(filter_sources, ",")
     }
