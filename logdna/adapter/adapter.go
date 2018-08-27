@@ -167,7 +167,7 @@ func (l *Adapter) flushBuffer(buffer []Line) {
 func buildLogDNAURL(baseURL, token string, tags string) string {
 
     v := url.Values{}
-    if endpoint != "" {
+    if tags != "" {
         v.Add("tags", tags)
     }
     v.Add("apikey", token)
