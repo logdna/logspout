@@ -22,6 +22,7 @@ type Adapter struct {
     log        *log.Logger
     logdnaURL  string
     queue      chan Line
+    host       string
 }
 
 type Line struct {
