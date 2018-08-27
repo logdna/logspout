@@ -138,6 +138,8 @@ func (l *Adapter) flushBuffer(buffer []Line) {
 
     json.NewEncoder(&data).Encode(body)
     resp, err := http.Post(l.logdnaURL, "application/json; charset=UTF-8", &data)
+    l.log.Println(resp)
+    l.log.Println(err)
 
     if resp != nil {
         defer resp.Body.Close()
@@ -174,6 +176,6 @@ func buildLogDNAURL(baseURL, token string, tags string) string {
     v.Add("hostname", "logdna_logspout")
 
     ldna_url := "https://" + baseURL + "?" + v.Encode()
-
+    l.log.Println(ldna_url)
     return ldna_url
 }
