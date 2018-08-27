@@ -35,7 +35,7 @@ type Message struct {
     Message     string        `json:"message"`
     Container   ContainerInfo `json:"container"`
     Level       string        `json:"level"`
-    Hostname    string        `json:"hostname,omitempty"`
+    Hostname    string        `json:"hostname"`
 }
 
 type ContainerInfo struct {
