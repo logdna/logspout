@@ -26,14 +26,14 @@ func init() {
 
     filter_labels := os.Getenv(filterLabelsVar)
     if filter_labels == "" {
-        filter_labels = []string
+        filter_labels = make([]string, 0)
     } else {
         filter_labels = strings.Split(filter_labels, ",")
     }
 
     filter_sources := os.Getenv(filterSourcesVar)
     if filter_sources == "" {
-        filter_sources = []string
+        filter_sources = make([]string, 0)
     } else {
         filter_sources = strings.Split(filter_sources, ",")
     }
