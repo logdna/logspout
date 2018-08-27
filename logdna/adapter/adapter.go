@@ -70,6 +70,14 @@ func (l *Adapter) getLevel(source string) string {
     return level
 }
 
+func (l *Adapter) getHost(container_hostname string) string {
+    host := container_hostname
+    if (l.host != "no_custom_hostname") {
+        host = l.host
+    }
+    return host
+}
+
 func (l *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
         messageStr, err := json.Marshal(Message{
@@ -84,7 +92,7 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
                 },
             },
             Level:      l.getLevel(m.Source),
-            Hostname:   l.host,
+            Hostname:   l.getHost(m.Container.Config.Hostname),
         })
         fmt.Println(l.host)
         fmt.Println(err)

@@ -54,6 +54,10 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         )
     }
 
+    if hostname == "" {
+        hostname = "no_custom_hostname"
+    }
+
     return adapter.New(
         endpoint,
         token,
