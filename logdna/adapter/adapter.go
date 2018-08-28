@@ -181,6 +181,5 @@ func buildLogDNAURL(baseURL, token string, tags string) string {
     v.Add("hostname", "logdna_logspout")
 
     ldna_url := "https://" + baseURL + "?" + v.Encode()
-    fmt.Println(ldna_url)
     return ldna_url
 }
