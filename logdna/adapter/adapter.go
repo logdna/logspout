@@ -22,6 +22,7 @@ type Adapter struct {
     log        *log.Logger
     logdnaURL  string
     queue      chan Line
+    host       string
 }
 
 type Line struct {
@@ -34,6 +35,7 @@ type Message struct {
     Message     string        `json:"message"`
     Container   ContainerInfo `json:"container"`
     Level       string        `json:"level"`
+    Hostname    string        `json:"hostname"`
 }
 
 type ContainerInfo struct {
@@ -48,13 +50,13 @@ type ContainerConfig struct {
     Labels      map[string]string   `json:"labels"`
 }
 
-func New(baseURL string, logdnaToken string, tags string) *Adapter {
+func New(baseURL string, logdnaToken string, tags string, hostname string) *Adapter {
     adapter := &Adapter{
         log:        log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
         logdnaURL:  buildLogDNAURL(baseURL, logdnaToken, tags),
         queue:      make(chan Line),
+        host:       hostname,
     }
-
     go adapter.readQueue()
     return adapter
 }
@@ -65,6 +67,14 @@ func (l *Adapter) getLevel(source string) string {
         level = "INFO"
     }
     return level
+}
+
+func (l *Adapter) getHost(container_hostname string) string {
+    host := container_hostname
+    if (l.host != "no_custom_hostname") {
+        host = l.host
+    }
+    return host
 }
 
 func (l *Adapter) Stream(logstream chan *router.Message) {
@@ -81,6 +91,7 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
                 },
             },
             Level:      l.getLevel(m.Source),
+            Hostname:   l.getHost(m.Container.Config.Hostname),
         })
         if err != nil {
             log.Fatal(err.Error())
@@ -163,11 +174,12 @@ func (l *Adapter) flushBuffer(buffer []Line) {
 func buildLogDNAURL(baseURL, token string, tags string) string {
 
     v := url.Values{}
-    v.Add("tags", tags)
+    if tags != "" {
+        v.Add("tags", tags)
+    }
     v.Add("apikey", token)
     v.Add("hostname", "logdna_logspout")
 
     ldna_url := "https://" + baseURL + "?" + v.Encode()
-
     return ldna_url
 }
