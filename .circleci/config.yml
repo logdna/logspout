@@ -7,13 +7,13 @@ jobs:
       - checkout
       - run:
           name: Build Docker Image
-          command: docker build -f Dockerfile -t ${REPO}/${IMAGE}:${TAG} .
+          command: docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} .
       - run:
           name: Authenticate with Docker Hub
-          command: echo ${PASSWORD} | docker login --username samirmusali --password-stdin
+          command: docker login --username ${USERNAME} --password ${PASSWORD}
       - run:
           name: Push Docker Image
-          command: docker push ${REPO}/${IMAGE}
+          command: docker push ${USERNAME}/${IMAGE}
 workflows:
   version: 2
   update_image:
