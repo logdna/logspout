@@ -93,6 +93,7 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
             Level:      l.getLevel(m.Source),
             Hostname:   l.getHost(m.Container.Config.Hostname),
         })
+        fmt.Println(m.Container.Config.Labels)
         if err != nil {
             log.Fatal(err.Error())
         }
