@@ -100,6 +100,9 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
         labelStr, errls := json.Marshal(LabelStruct{
             Labels: m.Container.Config.Labels,
         })
+        if errls != nil {
+            log.Fatal(err.Error())
+        }
         fmt.Println(labelStr)
         if err != nil {
             log.Fatal(err.Error())
