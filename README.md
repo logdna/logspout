@@ -8,7 +8,7 @@ A Docker LogSpout image to stream logs from your containers to LogDNA.
 * __LOGDNA_KEY__: LogDNA Ingestion Key, *Required*
 * __FILTER_NAME__: Filter by Container Name with Wildcards, *Optional*
 * __FILTER_ID__: Filter by Container ID with Wildcards, *Optional*
-* __FILTER_SOURCES_: Filter by Comma-separated List of Sources, *Optional*
+* __FILTER_SOURCES__: Filter by Comma-separated List of Sources, *Optional*
 * __FILTER_LABELS__: Filter by Comma-separated List of Labels, *Optional*
 * __HOSTNAME__: Alternative Hostname, *Optional*
 * __TAGS__: Comma-separated List of Tags, *Optional*

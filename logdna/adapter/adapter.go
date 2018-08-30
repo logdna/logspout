@@ -50,10 +50,6 @@ type ContainerConfig struct {
     Labels      map[string]string   `json:"labels"`
 }
 
-type LabelStruct struct {
-    Labels      map[string]string   `json:"labels"`
-}
-
 func New(baseURL string, logdnaToken string, tags string, hostname string) *Adapter {
     adapter := &Adapter{
         log:        log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
@@ -96,9 +92,6 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
             },
             Level:      l.getLevel(m.Source),
             Hostname:   l.getHost(m.Container.Config.Hostname),
-        })
-        labelStr, errls := json.Marshal(LabelStruct{
-            Labels: m.Container.Config.Labels,
         })
         if errls != nil {
             log.Fatal(err.Error())
