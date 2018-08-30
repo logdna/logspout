@@ -103,7 +103,7 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
         if errls != nil {
             log.Fatal(err.Error())
         }
-        fmt.Println(labelStr)
+        fmt.Println(string(labelStr))
         if err != nil {
             log.Fatal(err.Error())
         }
