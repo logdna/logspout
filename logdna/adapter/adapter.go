@@ -18,6 +18,7 @@ const (
     bufferSize      = 10000
 )
 
+// Adapter structure:
 type Adapter struct {
     log        *log.Logger
     logdnaURL  string
@@ -25,12 +26,14 @@ type Adapter struct {
     host       string
 }
 
+// Line structure for the queue of Adapter:
 type Line struct {
     Timestamp int64  `json:"timestamp"`
     Line      string `json:"line"`
     File      string `json:"file"`
 }
 
+// Message structure:
 type Message struct {
     Message     string        `json:"message"`
     Container   ContainerInfo `json:"container"`
@@ -38,18 +41,21 @@ type Message struct {
     Hostname    string        `json:"hostname"`
 }
 
+// ContainerInfo structure for the Container of Message:
 type ContainerInfo struct {
     Name    string          `json:"name"`
     ID      string          `json:"id"`
     Config  ContainerConfig `json:"config"`
 }
 
+// ContainerConfig structure for the Config of ContainerInfo:
 type ContainerConfig struct {
     Image       string              `json:"image"`
     Hostname    string              `json:"hostname"`
     Labels      map[string]string   `json:"labels"`
 }
 
+// New method of Adapter:
 func New(baseURL string, logdnaToken string, tags string, hostname string) *Adapter {
     adapter := &Adapter{
         log:        log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
@@ -69,14 +75,15 @@ func (adapter *Adapter) getLevel(source string) string {
     return level
 }
 
-func (adapter *Adapter) getHost(container_hostname string) string {
-    host := container_hostname
+func (adapter *Adapter) getHost(containerHostname string) string {
+    host := containerHostname
     if (adapter.host != "no_custom_hostname") {
         host = adapter.host
     }
     return host
 }
 
+// Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
         messageStr, err := json.Marshal(Message{
@@ -97,9 +104,9 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             log.Fatal(err.Error())
             adapter.log.Println(
                 fmt.Errorf(
-                    "error from client: %s",
-                    ""
-                )
+                    "Invalid Data: %s",
+                    m.Data,
+                ),
             )
         } else {
             adapter.queue <- Line{
@@ -207,6 +214,6 @@ func buildLogDNAURL(baseURL, token string, tags string) string {
     v.Add("apikey", token)
     v.Add("hostname", "logdna_logspout")
 
-    ldna_url := "https://" + baseURL + "?" + v.Encode()
-    return ldna_url
+    ldnaURL := "https://" + baseURL + "?" + v.Encode()
+    return ldnaURL
 }
