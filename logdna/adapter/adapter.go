@@ -61,7 +61,7 @@ func New(baseURL string, logdnaToken string, tags string, hostname string) *Adap
     return adapter
 }
 
-func (l *Adapter) getLevel(source string) string {
+func (adapter *Adapter) getLevel(source string) string {
     level := "ERROR"
     if (source == "stdout") {
         level = "INFO"
@@ -69,15 +69,15 @@ func (l *Adapter) getLevel(source string) string {
     return level
 }
 
-func (l *Adapter) getHost(container_hostname string) string {
+func (adapter *Adapter) getHost(container_hostname string) string {
     host := container_hostname
-    if (l.host != "no_custom_hostname") {
-        host = l.host
+    if (adapter.host != "no_custom_hostname") {
+        host = adapter.host
     }
     return host
 }
 
-func (l *Adapter) Stream(logstream chan *router.Message) {
+func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
         messageStr, err := json.Marshal(Message{
             Message:    m.Data,
@@ -90,17 +90,13 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
                     Labels:     m.Container.Config.Labels,
                 },
             },
-            Level:      l.getLevel(m.Source),
-            Hostname:   l.getHost(m.Container.Config.Hostname),
+            Level:      adapter.getLevel(m.Source),
+            Hostname:   adapter.getHost(m.Container.Config.Hostname),
         })
-        if errls != nil {
-            log.Fatal(err.Error())
-        }
-        fmt.Println(string(labelStr))
         if err != nil {
             log.Fatal(err.Error())
         }
-        l.queue <- Line{
+        adapter.queue <- Line{
             Line:       string(messageStr),
             File:       m.Container.Name,
             Timestamp:  time.Now().Unix(),
@@ -108,25 +104,25 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
     }
 }
 
-func (l *Adapter) readQueue() {
+func (adapter *Adapter) readQueue() {
 
-    buffer := l.newBuffer()
+    buffer := adapter.newBuffer()
     timeout := time.NewTimer(flushTimeout)
     for {
         select {
-        case msg := <-l.queue:
+        case msg := <-adapter.queue:
             if len(buffer) == cap(buffer) {
                 timeout.Stop()
-                l.flushBuffer(buffer)
-                buffer = l.newBuffer()
+                adapter.flushBuffer(buffer)
+                buffer = adapter.newBuffer()
             }
 
             buffer = append(buffer, msg)
 
         case <-timeout.C:
             if len(buffer) > 0 {
-                l.flushBuffer(buffer)
-                buffer = l.newBuffer()
+                adapter.flushBuffer(buffer)
+                buffer = adapter.newBuffer()
             }
         }
 
@@ -134,11 +130,11 @@ func (l *Adapter) readQueue() {
     }
 }
 
-func (l *Adapter) newBuffer() []Line {
+func (adapter *Adapter) newBuffer() []Line {
     return make([]Line, 0, bufferSize)
 }
 
-func (l *Adapter) flushBuffer(buffer []Line) {
+func (adapter *Adapter) flushBuffer(buffer []Line) {
     var data bytes.Buffer
 
     body := struct {
@@ -148,14 +144,14 @@ func (l *Adapter) flushBuffer(buffer []Line) {
     }
 
     json.NewEncoder(&data).Encode(body)
-    resp, err := http.Post(l.logdnaURL, "application/json; charset=UTF-8", &data)
+    resp, err := http.Post(adapter.logdnaURL, "application/json; charset=UTF-8", &data)
 
     if resp != nil {
         defer resp.Body.Close()
     }
 
     if err != nil {
-        l.log.Println(
+        adapter.log.Println(
             fmt.Errorf(
                 "error from client: %s",
                 err.Error(),
@@ -165,7 +161,7 @@ func (l *Adapter) flushBuffer(buffer []Line) {
     }
 
     if resp.StatusCode != http.StatusOK {
-        l.log.Println(
+        adapter.log.Println(
             fmt.Errorf(
                 "received a %s status code when sending message. response: %s",
                 resp.StatusCode,
