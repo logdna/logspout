@@ -95,11 +95,18 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
         })
         if err != nil {
             log.Fatal(err.Error())
-        }
-        adapter.queue <- Line{
-            Line:       string(messageStr),
-            File:       m.Container.Name,
-            Timestamp:  time.Now().Unix(),
+            adapter.log.Println(
+                fmt.Errorf(
+                    "error from client: %s",
+                    ""
+                )
+            )
+        } else {
+            adapter.queue <- Line{
+                Line:       string(messageStr),
+                File:       m.Container.Name,
+                Timestamp:  time.Now().Unix(),
+            }
         }
     }
 }
@@ -143,7 +150,27 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
         Lines: buffer,
     }
 
-    json.NewEncoder(&data).Encode(body)
+    err := json.NewEncoder(&data).Encode(body)
+
+    if err != nil {
+        adapter.log.Println(
+            fmt.Errorf(
+                "error from client: %s",
+                "following lines couldn't be encoded:",
+            ),
+        )
+        for i, line := range buffer {
+            adapter.log.Println(
+                fmt.Errorf(
+                    "%d. %s",
+                    i,
+                    line.Line,
+                ),
+            )
+        }
+        return
+    }
+
     resp, err := http.Post(adapter.logdnaURL, "application/json; charset=UTF-8", &data)
 
     if resp != nil {
