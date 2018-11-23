@@ -1,5 +1,16 @@
 version: 2
 jobs:
+  test:
+    docker:
+      - image: circleci/golang:1.11.1
+    steps:
+      - checkout
+      - run:
+          name: Install Go Linter
+          command: go get -u golang.org/x/lint/golint
+      - run:
+          name: Lint It
+          command: golint -set_exit_status modules.go logdna/logdna.go logdna/adapter/adapter.go
   publish:
     machine:
       docker_layer_caching: true
