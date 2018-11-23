@@ -95,6 +95,7 @@ func (adapter *Adapter) getTags(tags string, m *router.Message) string {
     }
 
     adapter.log.Println(adapter.tags)
+    fmt.Println(adapter.tags)
 
     splitTags := strings.Split(tags, ",")
     var listTags []string
@@ -163,6 +164,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
         })
 
         adapter.log.Println(adapter.tags)
+        fmt.Println(adapter.tags)
 
         if err != nil {
             adapter.log.Println(
