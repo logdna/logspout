@@ -162,7 +162,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             },
             Level:      adapter.getLevel(m.Source),
             Hostname:   adapter.getHost(m.Container.Config.Hostname),
-            Tags:       "test1223443234",
+            Tags:       adapter.getTags(m),
         })
 
         adapter.log.Println(adapter.tags)
