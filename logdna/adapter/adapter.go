@@ -137,8 +137,6 @@ func (adapter *Adapter) getTags(m *router.Message) string {
         }
     }
 
-    fmt.Println(strings.Join(listTags, ","))
-
     return strings.Join(listTags, ",")
 }
 
