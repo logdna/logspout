@@ -24,6 +24,7 @@ type Adapter struct {
     logdnaURL  string
     queue      chan Line
     host       string
+    tags       string
 }
 
 // Line structure for the queue of Adapter:
@@ -39,6 +40,7 @@ type Message struct {
     Container   ContainerInfo `json:"container"`
     Level       string        `json:"level"`
     Hostname    string        `json:"hostname"`
+    Tags        string        `json:"tags"`
 }
 
 // ContainerInfo structure for the Container of Message:
@@ -59,9 +61,10 @@ type ContainerConfig struct {
 func New(baseURL string, logdnaToken string, tags string, hostname string) *Adapter {
     adapter := &Adapter{
         log:        log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
-        logdnaURL:  buildLogDNAURL(baseURL, logdnaToken, tags),
+        logdnaURL:  buildLogDNAURL(baseURL, logdnaToken),
         queue:      make(chan Line),
         host:       hostname,
+        tags:       tags,
     }
     go adapter.readQueue()
     return adapter
@@ -83,6 +86,10 @@ func (adapter *Adapter) getHost(containerHostname string) string {
     return host
 }
 
+func (adapter *Adapter) getTags(tags string, m router.Message) string {
+    return tags
+}
+
 // Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
@@ -99,6 +106,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             },
             Level:      adapter.getLevel(m.Source),
             Hostname:   adapter.getHost(m.Container.Config.Hostname),
+            Tags:       adapter.getTags(adapter.tags, m),
         })
         if err != nil {
             log.Fatal(err.Error())
@@ -205,12 +213,9 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     }
 }
 
-func buildLogDNAURL(baseURL, token string, tags string) string {
+func buildLogDNAURL(baseURL, token string) string {
 
     v := url.Values{}
-    if tags != "" {
-        v.Add("tags", tags)
-    }
     v.Add("apikey", token)
     v.Add("hostname", "logdna_logspout")
 
