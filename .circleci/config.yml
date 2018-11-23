@@ -1,23 +1,5 @@
 version: 2
 jobs:
-  test:
-    docker:
-      - image: circleci/golang:1.11.1
-    steps:
-      - checkout
-      - run:
-          name: Install Go Linter
-          command: go get -u golang.org/x/lint/golint
-      - run:
-          name: Configure Linter
-          command: |
-            if [ -z $(which golint) ]; then
-              mv ${HOME}/go/bin/golint /usr/local/go/bin/
-              mv ${HOME}/go/src/golang.org/ /usr/local/go/src/
-            fi
-      - run:
-          name: Lint It
-          command: golint -set_exit_status modules.go logdna/logdna.go logdna/adapter/adapter.go
   publish:
     machine:
       docker_layer_caching: true
@@ -25,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Build Docker Image
-          command: docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} .
+          command: docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} -t ${USERNAME}/${IMAGE}:$(date +%Y%m%d) .
       - run:
           name: Authenticate with Docker Hub
           command: docker login --username ${USERNAME} --password ${PASSWORD}
