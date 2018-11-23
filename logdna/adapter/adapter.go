@@ -111,7 +111,7 @@ func (adapter *Adapter) getTags(m *router.Message) string {
 
             tmp, e := template.New("parsedTag").Parse(t)
             if e == nil {
-                err := tmp.ExecuteTemplate(parsedTag, "parsedTag", m)
+                err := tmp.ExecuteTemplate(&parsedTag, "parsedTag", m)
                 if err == nil {
                     for _, p := range strings.Split(parsedTag, ":") {
                         if existenceMap[p] == false {
