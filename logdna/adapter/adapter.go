@@ -156,6 +156,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             Hostname:   adapter.getHost(m.Container.Config.Hostname),
             Tags:       adapter.getTags(adapter.tags, m),
         })
+
         if err != nil {
             adapter.log.Println(
                 fmt.Errorf(
