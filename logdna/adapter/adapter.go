@@ -104,15 +104,16 @@ func (adapter *Adapter) getTags(m *router.Message) string {
 
     for _, t := range splitTags {
         if (strings.Contains(t, "{{") || strings.Contains(t, "}}")) {
-            var parsedTag string
-
+            var parsedTagBytes bytes.Buffer
+            
             adapter.log.Println(t)
             fmt.Println(t)
 
             tmp, e := template.New("parsedTag").Parse(t)
             if e == nil {
-                err := tmp.ExecuteTemplate(&parsedTag, "parsedTag", m)
+                err := tmp.ExecuteTemplate(&parsedTagBytes, "parsedTag", m)
                 if err == nil {
+                    parsedTag := parsedTagBytes.String()
                     for _, p := range strings.Split(parsedTag, ":") {
                         if existenceMap[p] == false {
                             listTags = append(listTags, p)
