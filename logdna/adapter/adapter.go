@@ -9,6 +9,8 @@ import (
     "net/http"
     "os"
     "time"
+    "strings"
+    "text/template"
 
     "github.com/gliderlabs/logspout/router"
 )
@@ -86,8 +88,54 @@ func (adapter *Adapter) getHost(containerHostname string) string {
     return host
 }
 
-func (adapter *Adapter) getTags(tags string, m router.Message) string {
-    return tags
+func (adapter *Adapter) getTags(tags string, m *router.Message) string {
+    
+    if tags == "" {
+        return ""
+    }
+
+    splitTags := strings.Split(tags, ",")
+    var listTags []string
+    var existenceMap map[string]bool
+
+    for t := range splitTags {
+        if strings.Contains(t, "{{") || strings.Contains(t, "}}") {
+            var parsedTag string
+            tmp, e := template.New("parsedTag").Parse(t)
+            if e == nil {
+                err = tmp.ExecuteTemplate(parsedTag, m)
+                if err == nil {
+                    for p := range strings.Split(parsedTag, ":") {
+                        if existenceMap[p] == false {
+                            listTags = append(listTags, p)
+                            existenceMap[p] = true
+                        }
+                    }
+                } else {
+                    adapter.log.Println(
+                        fmt.Errorf(
+                            "Invalid Tag: %s",
+                            t,
+                        ),
+                    )
+                }
+            } else {
+                adapter.log.Println(
+                    fmt.Errorf(
+                        "Error in creating Template from %s",
+                        t,
+                    ),
+                )
+            }
+        } else {
+            if existenceMap[t] == false {
+                listTags = append(listTags, t)
+                existenceMap[t] = true
+            }
+        }
+    }
+
+    return strings.Join(listTags, ",")
 }
 
 // Stream method is for streaming the messages:
@@ -109,7 +157,6 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             Tags:       adapter.getTags(adapter.tags, m),
         })
         if err != nil {
-            log.Fatal(err.Error())
             adapter.log.Println(
                 fmt.Errorf(
                     "Invalid Data: %s",
