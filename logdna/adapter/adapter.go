@@ -100,7 +100,7 @@ func (adapter *Adapter) getTags(m *router.Message) string {
 
     splitTags := strings.Split(adapter.tags, ",")
     var listTags []string
-    var existenceMap map[string]bool
+    var existenceMap map[string]bool{}
 
     for _, t := range splitTags {
         if (strings.Contains(t, "{{") || strings.Contains(t, "}}")) {
