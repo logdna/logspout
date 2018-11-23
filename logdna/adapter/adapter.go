@@ -88,13 +88,13 @@ func (adapter *Adapter) getHost(containerHostname string) string {
     return host
 }
 
-func (adapter *Adapter) getTags(tags string, m router.Message) string {
+func (adapter *Adapter) getTags(tags string, m *router.Message) string {
     
     if tags == "" {
         return ""
     }
 
-    log.Println(adapter.tags)
+    adapter.log.Println(adapter.tags)
     fmt.Println(adapter.tags)
 
     splitTags := strings.Split(tags, ",")
@@ -102,10 +102,10 @@ func (adapter *Adapter) getTags(tags string, m router.Message) string {
     var existenceMap map[string]bool
 
     for t := range splitTags {
-        if strings.Contains(t, "{{") || strings.Contains(t, "}}") {
+        if (strings.Contains(t, "{{") || strings.Contains(t, "}}")) {
             var parsedTag string
 
-            log.Println(t)
+            adapter.log.Println(t)
             fmt.Println(t)
 
             tmp, e := template.New("parsedTag").Parse(t)
@@ -164,7 +164,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             Tags:       adapter.getTags(adapter.tags, m),
         })
 
-        log.Println(adapter.tags)
+        adapter.log.Println(adapter.tags)
         fmt.Println(adapter.tags)
 
         if err != nil {
