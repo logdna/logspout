@@ -62,7 +62,7 @@ type ContainerConfig struct {
 // New method of Adapter:
 func New(baseURL string, logdnaToken string, tags string, hostname string) *Adapter {
     adapter := &Adapter{
-        log:        log.New(os.Stdout, "logdna/logspout", log.LstdFlags),
+        log:        log.New(os.Stdout, hostname + " ", log.LstdFlags),
         logdnaURL:  buildLogDNAURL(baseURL, logdnaToken),
         queue:      make(chan Line),
         host:       hostname,
@@ -91,12 +91,8 @@ func (adapter *Adapter) getHost(containerHostname string) string {
 func (adapter *Adapter) getTags(m *router.Message) string {
     
     if adapter.tags == "" {
-        adapter.log.Println("Empty %s", adapter.tags)
         return ""
     }
-
-    adapter.log.Println(adapter.tags)
-    fmt.Println(adapter.tags)
 
     splitTags := strings.Split(adapter.tags, ",")
     var listTags []string
@@ -106,9 +102,6 @@ func (adapter *Adapter) getTags(m *router.Message) string {
         if (strings.Contains(t, "{{") || strings.Contains(t, "}}")) {
             var parsedTagBytes bytes.Buffer
             
-            adapter.log.Println(t)
-            fmt.Println(t)
-
             tmp, e := template.New("parsedTag").Parse(t)
             if e == nil {
                 err := tmp.ExecuteTemplate(&parsedTagBytes, "parsedTag", m)
@@ -144,6 +137,8 @@ func (adapter *Adapter) getTags(m *router.Message) string {
         }
     }
 
+    fmt.Println(strings.Join(listTags, ","))
+
     return strings.Join(listTags, ",")
 }
 
@@ -165,9 +160,6 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             Hostname:   adapter.getHost(m.Container.Config.Hostname),
             Tags:       adapter.getTags(m),
         })
-
-        adapter.log.Println(adapter.tags)
-        fmt.Println(adapter.tags)
 
         if err != nil {
             adapter.log.Println(
