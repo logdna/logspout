@@ -102,7 +102,7 @@ func (adapter *Adapter) getTags(m *router.Message) string {
     var listTags []string
     var existenceMap map[string]bool
 
-    for t := range splitTags {
+    for _, t := range splitTags {
         if (strings.Contains(t, "{{") || strings.Contains(t, "}}")) {
             var parsedTag string
 
@@ -111,9 +111,9 @@ func (adapter *Adapter) getTags(m *router.Message) string {
 
             tmp, e := template.New("parsedTag").Parse(t)
             if e == nil {
-                err = tmp.ExecuteTemplate(parsedTag, m)
+                err := tmp.ExecuteTemplate(parsedTag, m)
                 if err == nil {
-                    for p := range strings.Split(parsedTag, ":") {
+                    for _, p := range strings.Split(parsedTag, ":") {
                         if existenceMap[p] == false {
                             listTags = append(listTags, p)
                             existenceMap[p] = true
