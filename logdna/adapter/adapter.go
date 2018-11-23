@@ -62,7 +62,7 @@ type ContainerConfig struct {
 // New method of Adapter:
 func New(baseURL string, logdnaToken string, tags string, hostname string) *Adapter {
     adapter := &Adapter{
-        log:        log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
+        log:        log.New(os.Stdout, "logdna/logspout", log.LstdFlags),
         logdnaURL:  buildLogDNAURL(baseURL, logdnaToken),
         queue:      make(chan Line),
         host:       hostname,
@@ -88,16 +88,17 @@ func (adapter *Adapter) getHost(containerHostname string) string {
     return host
 }
 
-func (adapter *Adapter) getTags(tags string, m *router.Message) string {
+func (adapter *Adapter) getTags(m *router.Message) string {
     
-    if tags == "" {
+    if adapter.tags == "" {
+        adapter.log.Println("Empty %s", adapter.tags)
         return ""
     }
 
     adapter.log.Println(adapter.tags)
     fmt.Println(adapter.tags)
 
-    splitTags := strings.Split(tags, ",")
+    splitTags := strings.Split(adapter.tags, ",")
     var listTags []string
     var existenceMap map[string]bool
 
@@ -161,7 +162,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             },
             Level:      adapter.getLevel(m.Source),
             Hostname:   adapter.getHost(m.Container.Config.Hostname),
-            Tags:       adapter.getTags(adapter.tags, m),
+            Tags:       adapter.getTags(m),
         })
 
         adapter.log.Println(adapter.tags)
