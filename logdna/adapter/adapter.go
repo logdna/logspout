@@ -9,6 +9,8 @@ import (
     "net/http"
     "os"
     "time"
+    "strings"
+    "text/template"
 
     "github.com/gliderlabs/logspout/router"
 )
@@ -18,50 +20,59 @@ const (
     bufferSize      = 10000
 )
 
+// Adapter structure:
 type Adapter struct {
     log        *log.Logger
     logdnaURL  string
     queue      chan Line
     host       string
+    tags       string
 }
 
+// Line structure for the queue of Adapter:
 type Line struct {
     Timestamp int64  `json:"timestamp"`
     Line      string `json:"line"`
     File      string `json:"file"`
 }
 
+// Message structure:
 type Message struct {
     Message     string        `json:"message"`
     Container   ContainerInfo `json:"container"`
     Level       string        `json:"level"`
     Hostname    string        `json:"hostname"`
+    Tags        string        `json:"tags"`
 }
 
+// ContainerInfo structure for the Container of Message:
 type ContainerInfo struct {
     Name    string          `json:"name"`
     ID      string          `json:"id"`
     Config  ContainerConfig `json:"config"`
 }
 
+// ContainerConfig structure for the Config of ContainerInfo:
 type ContainerConfig struct {
     Image       string              `json:"image"`
     Hostname    string              `json:"hostname"`
     Labels      map[string]string   `json:"labels"`
 }
 
+// New method of Adapter:
 func New(baseURL string, logdnaToken string, tags string, hostname string) *Adapter {
     adapter := &Adapter{
-        log:        log.New(os.Stdout, "logspout-logdna", log.LstdFlags),
-        logdnaURL:  buildLogDNAURL(baseURL, logdnaToken, tags),
+        log:        log.New(os.Stdout, hostname + " ", log.LstdFlags),
+        logdnaURL:  buildLogDNAURL(baseURL, logdnaToken),
         queue:      make(chan Line),
         host:       hostname,
+        tags:       tags,
     }
     go adapter.readQueue()
     return adapter
 }
 
-func (l *Adapter) getLevel(source string) string {
+func (adapter *Adapter) getLevel(source string) string {
     level := "ERROR"
     if (source == "stdout") {
         level = "INFO"
@@ -69,15 +80,68 @@ func (l *Adapter) getLevel(source string) string {
     return level
 }
 
-func (l *Adapter) getHost(container_hostname string) string {
-    host := container_hostname
-    if (l.host != "no_custom_hostname") {
-        host = l.host
+func (adapter *Adapter) getHost(containerHostname string) string {
+    host := containerHostname
+    if (adapter.host != "no_custom_hostname") {
+        host = adapter.host
     }
     return host
 }
 
-func (l *Adapter) Stream(logstream chan *router.Message) {
+func (adapter *Adapter) getTags(m *router.Message) string {
+    
+    if adapter.tags == "" {
+        return ""
+    }
+
+    splitTags := strings.Split(adapter.tags, ",")
+    var listTags []string
+    existenceMap := map[string]bool{}
+
+    for _, t := range splitTags {
+        if (strings.Contains(t, "{{") || strings.Contains(t, "}}")) {
+            var parsedTagBytes bytes.Buffer
+            
+            tmp, e := template.New("parsedTag").Parse(t)
+            if e == nil {
+                err := tmp.ExecuteTemplate(&parsedTagBytes, "parsedTag", m)
+                if err == nil {
+                    parsedTag := parsedTagBytes.String()
+                    for _, p := range strings.Split(parsedTag, ":") {
+                        if existenceMap[p] == false {
+                            listTags = append(listTags, p)
+                            existenceMap[p] = true
+                        }
+                    }
+                } else {
+                    adapter.log.Println(
+                        fmt.Errorf(
+                            "Invalid Tag: %s",
+                            t,
+                        ),
+                    )
+                }
+            } else {
+                adapter.log.Println(
+                    fmt.Errorf(
+                        "Error in creating Template from %s",
+                        t,
+                    ),
+                )
+            }
+        } else {
+            if existenceMap[t] == false {
+                listTags = append(listTags, t)
+                existenceMap[t] = true
+            }
+        }
+    }
+
+    return strings.Join(listTags, ",")
+}
+
+// Stream method is for streaming the messages:
+func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
         messageStr, err := json.Marshal(Message{
             Message:    m.Data,
@@ -90,39 +154,47 @@ func (l *Adapter) Stream(logstream chan *router.Message) {
                     Labels:     m.Container.Config.Labels,
                 },
             },
-            Level:      l.getLevel(m.Source),
-            Hostname:   l.getHost(m.Container.Config.Hostname),
+            Level:      adapter.getLevel(m.Source),
+            Hostname:   adapter.getHost(m.Container.Config.Hostname),
+            Tags:       adapter.getTags(m),
         })
+
         if err != nil {
-            log.Fatal(err.Error())
-        }
-        l.queue <- Line{
-            Line:       string(messageStr),
-            File:       m.Container.Name,
-            Timestamp:  time.Now().Unix(),
+            adapter.log.Println(
+                fmt.Errorf(
+                    "Invalid Data: %s",
+                    m.Data,
+                ),
+            )
+        } else {
+            adapter.queue <- Line{
+                Line:       string(messageStr),
+                File:       m.Container.Name,
+                Timestamp:  time.Now().Unix(),
+            }
         }
     }
 }
 
-func (l *Adapter) readQueue() {
+func (adapter *Adapter) readQueue() {
 
-    buffer := l.newBuffer()
+    buffer := adapter.newBuffer()
     timeout := time.NewTimer(flushTimeout)
     for {
         select {
-        case msg := <-l.queue:
+        case msg := <-adapter.queue:
             if len(buffer) == cap(buffer) {
                 timeout.Stop()
-                l.flushBuffer(buffer)
-                buffer = l.newBuffer()
+                adapter.flushBuffer(buffer)
+                buffer = adapter.newBuffer()
             }
 
             buffer = append(buffer, msg)
 
         case <-timeout.C:
             if len(buffer) > 0 {
-                l.flushBuffer(buffer)
-                buffer = l.newBuffer()
+                adapter.flushBuffer(buffer)
+                buffer = adapter.newBuffer()
             }
         }
 
@@ -130,11 +202,11 @@ func (l *Adapter) readQueue() {
     }
 }
 
-func (l *Adapter) newBuffer() []Line {
+func (adapter *Adapter) newBuffer() []Line {
     return make([]Line, 0, bufferSize)
 }
 
-func (l *Adapter) flushBuffer(buffer []Line) {
+func (adapter *Adapter) flushBuffer(buffer []Line) {
     var data bytes.Buffer
 
     body := struct {
@@ -143,15 +215,35 @@ func (l *Adapter) flushBuffer(buffer []Line) {
         Lines: buffer,
     }
 
-    json.NewEncoder(&data).Encode(body)
-    resp, err := http.Post(l.logdnaURL, "application/json; charset=UTF-8", &data)
+    err := json.NewEncoder(&data).Encode(body)
+
+    if err != nil {
+        adapter.log.Println(
+            fmt.Errorf(
+                "error from client: %s",
+                "following lines couldn't be encoded:",
+            ),
+        )
+        for i, line := range buffer {
+            adapter.log.Println(
+                fmt.Errorf(
+                    "%d. %s",
+                    i,
+                    line.Line,
+                ),
+            )
+        }
+        return
+    }
+
+    resp, err := http.Post(adapter.logdnaURL, "application/json; charset=UTF-8", &data)
 
     if resp != nil {
         defer resp.Body.Close()
     }
 
     if err != nil {
-        l.log.Println(
+        adapter.log.Println(
             fmt.Errorf(
                 "error from client: %s",
                 err.Error(),
@@ -161,7 +253,7 @@ func (l *Adapter) flushBuffer(buffer []Line) {
     }
 
     if resp.StatusCode != http.StatusOK {
-        l.log.Println(
+        adapter.log.Println(
             fmt.Errorf(
                 "received a %s status code when sending message. response: %s",
                 resp.StatusCode,
@@ -171,15 +263,12 @@ func (l *Adapter) flushBuffer(buffer []Line) {
     }
 }
 
-func buildLogDNAURL(baseURL, token string, tags string) string {
+func buildLogDNAURL(baseURL, token string) string {
 
     v := url.Values{}
-    if tags != "" {
-        v.Add("tags", tags)
-    }
     v.Add("apikey", token)
     v.Add("hostname", "logdna_logspout")
 
-    ldna_url := "https://" + baseURL + "?" + v.Encode()
-    return ldna_url
+    ldnaURL := "https://" + baseURL + "?" + v.Encode()
+    return ldnaURL
 }

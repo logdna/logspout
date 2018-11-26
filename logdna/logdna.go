@@ -24,27 +24,27 @@ const (
 func init() {
     router.AdapterFactories.Register(NewLogDNAAdapter, "logdna")
 
-    filter_labels := make([]string, 0)
+    filterLabels := make([]string, 0)
     filterLabelsValue := os.Getenv(filterLabelsVar)
     if filterLabelsValue != "" {
-        filter_labels = strings.Split(filterLabelsValue, ",")
+        filterLabels = strings.Split(filterLabelsValue, ",")
     }
 
-    filter_sources := make([]string, 0)
+    filterSources := make([]string, 0)
     filterSourcesValue := os.Getenv(filterSourcesVar)
     if filterSourcesValue != "" {
-        filter_sources = strings.Split(filterSourcesValue, ",")
+        filterSources = strings.Split(filterSourcesValue, ",")
     }
 
-    filter_id := os.Getenv(filterIDVar)
-    filter_name := os.Getenv(filterNameVar)
+    filterID := os.Getenv(filterIDVar)
+    filterName := os.Getenv(filterNameVar)
 
     r := &router.Route{
         Adapter:        "logdna",
-        FilterName:     filter_name,
-        FilterID:       filter_id,
-        FilterLabels:   filter_labels,
-        FilterSources:  filter_sources,
+        FilterName:     filterName,
+        FilterID:       filterID,
+        FilterLabels:   filterLabels,
+        FilterSources:  filterSources,
     }
 
     err := router.Routes.Add(r)
@@ -53,6 +53,7 @@ func init() {
     }
 }
 
+// NewLogDNAAdapter creates adapter:
 func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
     endpoint := os.Getenv(endpointVar)
     token := os.Getenv(tokenVar)

@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Build Docker Image
-          command: docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} .
+          command: docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} -t ${USERNAME}/${IMAGE}:$(date +%Y%m%d) .
       - run:
           name: Authenticate with Docker Hub
           command: docker login --username ${USERNAME} --password ${PASSWORD}
