@@ -114,20 +114,16 @@ func (adapter *Adapter) getTags(m *router.Message) string {
                         }
                     }
                 } else {
-                    adapter.log.Println(
-                        fmt.Errorf(
-                            "Invalid Tag: %s",
-                            t,
-                        ),
-                    )
+                    if existenceMap[t] == false {
+                        listTags = append(listTags, t)
+                        existenceMap[t] = true
+                    }
                 }
             } else {
-                adapter.log.Println(
-                    fmt.Errorf(
-                        "Error in creating Template from %s",
-                        t,
-                    ),
-                )
+                if existenceMap[t] == false {
+                    listTags = append(listTags, t)
+                    existenceMap[t] = true
+                }
             }
         } else {
             if existenceMap[t] == false {
