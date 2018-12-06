@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/logdna/logspout.svg?style=svg)](https://circleci.com/gh/logdna/logspout)
+
 # LogDNA LogSpout
 
 A Docker LogSpout image to stream logs from your containers to LogDNA.
