@@ -61,7 +61,7 @@ services:
 
 ### Rancher
 
-* Create a LogDNA stack from the Rancher compose file below:
+Create a LogDNA stack from the Rancher compose file below:
 ```yaml
 version: '2'
 services:
@@ -80,18 +80,25 @@ services:
 
 ### Docker Swarm
 
-Append the following to your Docker Swarm compose file:
+Modify your Docker Swarm Compose file to have `LogDNA` Service:
 ```yaml
 version: "3"
 networks:
-- logging:
-    services:
-      logdna:
-        image: logdna/logspout:latest
-        volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
-        environment:
-        - LOGDNA_KEY="<LogDNA Ingestion Key>"
+  logging:
+services:
+  logdna:
+    image: logdna/logspout:latest
+    networks:
+      - logging
+    volumes:
+      - /etc/hostname:/etc/host_hostname:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      syslog://svt2-logger.am2.cloudra.local:514
+    environment:
+      - LOGDNA_KEY="<LogDNA Ingestion Key>"
+    deploy:
+      mode: global
 ```
 
 ### Notes
