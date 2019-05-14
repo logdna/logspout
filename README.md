@@ -44,10 +44,10 @@ logdna:
 
 ### Elastic Container Service (ECS)
 
-Append the following to your ECS cloud configuration:
+Modify your ECS Cloud Configuration file to have `LogDNA` Service as described below:
 ```yaml
 services:
-  logspout:
+  logdna:
     environment:
         - LOGDNA_KEY="<LogDNA Ingestion Key>"
         - TAGS='{{ if .Container.Config.Labels }}{{index .Container.Config.Labels "com.amazonaws.ecs.task-definition-family"}}:{{index .Container.Config.Labels "com.amazonaws.ecs.container-name"}}{{ else }}{{.ContainerName}}{{ end }}'
@@ -61,7 +61,7 @@ services:
 
 ### Rancher
 
-Create a LogDNA stack from the Rancher compose file below:
+Modify your Rancher Compose Stackfile to have `LogDNA` Service as described below:
 ```yaml
 version: '2'
 services:
@@ -80,7 +80,7 @@ services:
 
 ### Docker Swarm
 
-Modify your Docker Swarm Compose file to have `LogDNA` Service:
+Modify your Docker Swarm Compose file to have `LogDNA` Service as described below:
 ```yaml
 version: "3"
 networks:
@@ -93,8 +93,6 @@ services:
     volumes:
       - /etc/hostname:/etc/host_hostname:ro
       - /var/run/docker.sock:/var/run/docker.sock
-    command:
-      syslog://svt2-logger.am2.cloudra.local:514
     environment:
       - LOGDNA_KEY="<LogDNA Ingestion Key>"
     deploy:
