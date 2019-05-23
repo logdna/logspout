@@ -6,8 +6,21 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Check Tagged Push
+          command: |
+            TAG_VERSION=$(git tag -l --sort=-v:refname | head -n 1 | cut -d'-' -f2)
+            CLOG_VERSION=$(cat CHANGELOG.md | grep "## v" | head -n 1 | cut -d'v' -f2)
+            if [[ "${TAG_VERSION}" != "${CLOG_VERSION}" ]]; then
+              echo "There is mismatch:"
+              echo "  TAG_VERSION: ${TAG_VERSION}"
+              echo "  CLOG_VERSION: ${CLOG_VERSION}"
+              exit 1
+            fi
+            echo 'export VERSION=${TAG_VERSION}' >> ${BASH_ENV}
+      - run:
           name: Build Docker Image
-          command: docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} -t ${USERNAME}/${IMAGE}:$(date +%Y%m%d) .
+          command: |
+            docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} -t ${USERNAME}/${IMAGE}:${VERSION} .
       - run:
           name: Authenticate with Docker Hub
           command: docker login --username ${USERNAME} --password ${PASSWORD}
@@ -22,3 +35,5 @@ workflows:
           filters:
             branches:
               only: master
+            tags:
+              only: /[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?/
