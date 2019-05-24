@@ -28,80 +28,50 @@ import (
     "errors"
     "log"
     "os"
+    "strconv"
     "strings"
 
     "github.com/gliderlabs/logspout/router"
     "github.com/logdna/logspout/logdna/adapter"
-)
-
-const (
-    endpointVar         = "LOGDNA_URL"
-    tokenVar            = "LOGDNA_KEY"
-    tagsVar             = "TAGS"
-    hostVar             = "HOSTNAME"
-    filterNameVar       = "FILTER_NAME"
-    filterIDVar         = "FILTER_ID"
-    filterSourcesVar    = "FILTER_SOURCES"
-    filterLabelsVar     = "FILTER_LABELS"
+    "github.com/logdna/logspout/logdna/types"
 )
 
 func init() {
     router.AdapterFactories.Register(NewLogDNAAdapter, "logdna")
 
-    filterLabels := make([]string, 0)
-    filterLabelsValue := os.Getenv(filterLabelsVar)
-    if filterLabelsValue != "" {
-        filterLabels = strings.Split(filterLabelsValue, ",")
-    }
-
-    filterSources := make([]string, 0)
-    filterSourcesValue := os.Getenv(filterSourcesVar)
-    if filterSourcesValue != "" {
-        filterSources = strings.Split(filterSourcesValue, ",")
-    }
-
-    filterID := os.Getenv(filterIDVar)
-    filterName := os.Getenv(filterNameVar)
-
     r := &router.Route{
         Adapter:        "logdna",
-        FilterName:     filterName,
-        FilterID:       filterID,
-        FilterLabels:   filterLabels,
-        FilterSources:  filterSources,
+        FilterName:     os.Getenv("FILTER_NAME"),
+        FilterID:       os.Getenv("FILTER_ID"),
+        FilterLabels:   strings.Split(os.Getenv("FILTER_LABELS"), ","),
+        FilterSources:  strings.Split(os.Getenv("FILTER_SOURCES"), ","),
     }
 
-    err := router.Routes.Add(r)
-    if err != nil {
+    if err := router.Routes.Add(r); err != nil {
         log.Fatal("could not add route: ", err.Error())
     }
 }
 
 // NewLogDNAAdapter creates adapter:
 func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
-    endpoint := os.Getenv(endpointVar)
-    token := os.Getenv(tokenVar)
-    tags := os.Getenv(tagsVar)
-    hostname := os.Getenv(hostVar)
-
-    if endpoint == "" {
-        endpoint = "logs.logdna.com/logs/ingest"
-    }
-
+    token := os.Getenv("LOGDNA_KEY")
     if token == "" {
-        return nil, errors.New(
-            "could not find environment variable LOGDNA_KEY",
-        )
+        return nil, errors.New("Cannot Find Environment Variable \"LOGDNA_KEY\"")
     }
 
-    if hostname == "" {
-        hostname = "no_custom_hostname"
+    config := types.Configuration{
+        Endpoint:       "logs.logdna.com/logs/ingest",
+        FlushInterval:  250,
+        Hostname:       os.Getenv("HOSTNAME"),
+        MaxBufferSize:  2 * 1024 * 1024,
+        Token:          token,
+        Tags:           strings.Split(os.Getenv("TAGS"), ","),
     }
 
-    return adapter.New(
-        endpoint,
-        token,
-        tags,
-        hostname,
-    ), nil
+    endpoint := os.Getenv("LOGDNA_URL")
+    if endpoint != "" {
+        config.Endpoint = endpoint
+    }
+
+    return adapter.New(config), nil
 }
