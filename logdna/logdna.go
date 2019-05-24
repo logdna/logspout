@@ -64,6 +64,7 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         FlushInterval:  250,
         Hostname:       os.Getenv("HOSTNAME"),
         MaxBufferSize:  2 * 1024 * 1024,
+        MaxLineLength:  16000,
         Token:          token,
         Tags:           strings.Split(os.Getenv("TAGS"), ","),
         Verbose:        true,

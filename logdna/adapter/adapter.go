@@ -83,12 +83,19 @@ func (adapter *types.Adapter) getTags(m *router.Message) string {
     return strings.Join(listTags, ",")
 }
 
+func (adapter *types.Adapter) sanitizeMessage(message string) string {
+    if uint64(len(message)) > adapter.Config.MaxLineLength {
+        return message[0:adapter.Config.MaxLineLength] + " (cut off, too long...)"
+    }
+    return message
+}
+
 // Stream method is for streaming the messages:
 func (adapter *types.Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
         if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
             messageStr, err := json.Marshal(Message{
-                Message:    m.Data,
+                Message:    adapter.sanitizeMessage(m.Data),
                 Container:  ContainerInfo{
                     Name:   m.Container.Name,
                     ID:     m.Container.ID,

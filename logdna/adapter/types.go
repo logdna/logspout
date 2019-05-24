@@ -11,6 +11,7 @@ type Configuration struct {
     FlushInterval   uint64
     Hostname        string
     MaxBufferSize   uint64
+    MaxLineLength	uint64
     Tags            []string
     Token           string
     Verbose			bool
