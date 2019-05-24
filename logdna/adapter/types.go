@@ -1,6 +1,10 @@
 // Package types defines the types used in LogDNA LogSpout Adapter
 package types
 
+import (
+    "log"
+)
+
 // Configuration is Configuration Struct for LogDNA Adapter:
 type Configuration struct {
     Endpoint        string
@@ -9,6 +13,7 @@ type Configuration struct {
     MaxBufferSize   uint64
     Tags            []string
     Token           string
+    Verbose			bool
 }
 
 // Adapter structure:

@@ -66,11 +66,16 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         MaxBufferSize:  2 * 1024 * 1024,
         Token:          token,
         Tags:           strings.Split(os.Getenv("TAGS"), ","),
+        Verbose:        true,
     }
 
     endpoint := os.Getenv("LOGDNA_URL")
     if endpoint != "" {
         config.Endpoint = endpoint
+    }
+
+    if (os.Getenv("VERBOSE") == "0") {
+        config.Verbose = false
     }
 
     return adapter.New(config), nil

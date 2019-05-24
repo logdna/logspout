@@ -86,34 +86,36 @@ func (adapter *types.Adapter) getTags(m *router.Message) string {
 // Stream method is for streaming the messages:
 func (adapter *types.Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
-        messageStr, err := json.Marshal(Message{
-            Message:    m.Data,
-            Container:  ContainerInfo{
-                Name:   m.Container.Name,
-                ID:     m.Container.ID,
-                Config: ContainerConfig{
-                    Image:      m.Container.Config.Image,
-                    Hostname:   m.Container.Config.Hostname,
-                    Labels:     m.Container.Config.Labels,
+        if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
+            messageStr, err := json.Marshal(Message{
+                Message:    m.Data,
+                Container:  ContainerInfo{
+                    Name:   m.Container.Name,
+                    ID:     m.Container.ID,
+                    Config: ContainerConfig{
+                        Image:      m.Container.Config.Image,
+                        Hostname:   m.Container.Config.Hostname,
+                        Labels:     m.Container.Config.Labels,
+                    },
                 },
-            },
-            Level:      adapter.getLevel(m.Source),
-            Hostname:   adapter.getHost(m.Container.Config.Hostname),
-            Tags:       adapter.getTags(m),
-        })
+                Level:      adapter.getLevel(m.Source),
+                Hostname:   adapter.getHost(m.Container.Config.Hostname),
+                Tags:       adapter.getTags(m),
+            })
 
-        if err != nil {
-            adapter.Log.Println(
-                fmt.Errorf(
-                    "Invalid Data: %s",
-                    m.Data,
-                ),
-            )
-        } else {
-            adapter.Queue <- Line{
-                Line:       string(messageStr),
-                File:       m.Container.Name,
-                Timestamp:  time.Now().Unix(),
+            if err != nil {
+                adapter.Log.Println(
+                    fmt.Errorf(
+                        "Invalid Data: %s",
+                        m.Data,
+                    ),
+                )
+            } else {
+                adapter.Queue <- Line{
+                    Line:       string(messageStr),
+                    File:       m.Container.Name,
+                    Timestamp:  time.Now().Unix(),
+                }
             }
         }
     }
