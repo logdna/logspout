@@ -14,6 +14,8 @@ import (
     "strings"
     "text/template"
     "time"
+
+    "github.com/gliderlabs/logspout/router"
 )
 
 // New method of Adapter:
@@ -24,7 +26,7 @@ func New(config Configuration) *Adapter {
         Log:        log.New(os.Stdout, config.Custom.Hostname + " ", log.LstdFlags),
         LogDNAURL:  buildLogDNAURL(config.Custom.Endpoint, config.Custom.Token),
         Queue:      make(chan Line),
-        HTTPClient: &http.Client{
+        HTTPClient: http.Client{
             Timeout:    config.HTTPClient.Timeout,
             Transport:  &http.Transport{
                 ExpectContinueTimeout:  config.HTTPClient.ExpectContinueTimeout,
@@ -155,7 +157,7 @@ func (adapter *Adapter) readQueue() {
     for {
         select {
         case msg := <-adapter.Queue:
-            if bytes >= adapter.Limits.MaxBufferSize {
+            if uint64(bytes) >= adapter.Limits.MaxBufferSize {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
                 timeout.Reset(adapter.Limits.FlushInterval)
