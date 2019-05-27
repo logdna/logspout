@@ -34,7 +34,6 @@ import (
 
     "github.com/gliderlabs/logspout/router"
     "github.com/answerbook/logspout/logdna/adapter"
-    "github.com/answerbook/logspout/logdna/types"
 )
 
 func init() {
