@@ -107,27 +107,34 @@ func (adapter *types.Adapter) sanitizeMessage(message string) string {
 func (adapter *types.Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
         if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
-            messageStr, err := json.Marshal(Message{
+            msg := Message{
                 Message:    adapter.sanitizeMessage(m.Data),
                 Container:  ContainerInfo{
                     Name:   m.Container.Name,
                     ID:     m.Container.ID,
+                    PID:    m.Container.State.Pid,
                     Config: ContainerConfig{
                         Image:      m.Container.Config.Image,
-                        Hostname:   m.Container.Config.Custom.Hostname,
+                        Hostname:   m.Container.Config.Hostname,
                         Labels:     m.Container.Config.Labels,
                     },
                 },
                 Level:      adapter.getLevel(m.Source),
-                Hostname:   adapter.getHost(m.Container.Config.Custom.Hostname),
+                Hostname:   adapter.getHost(m.Container.Config.Hostname),
                 Tags:       adapter.getTags(m),
-            })
+            }
+
+            if m.Priority {
+                msg.Level = m.Priority
+            }
+
+            messageStr, err := json.Marshal(msg)
 
             if err != nil {
                 adapter.Log.Println(
                     fmt.Errorf(
-                        "Invalid Data: %s",
-                        m.Data,
+                        "JSON Marshalling Error: %s",
+                        err.Error(),
                     ),
                 )
             } else {
@@ -187,7 +194,7 @@ func (adapter *types.Adapter) flushBuffer(buffer []Line) {
     if err != nil {
         adapter.Log.Println(
             fmt.Errorf(
-                "error from client: %s",
+                "JSON Encoding Error: %s",
                 err.Error(),
             ),
         )
@@ -211,7 +218,7 @@ func (adapter *types.Adapter) flushBuffer(buffer []Line) {
         } else {
             adapter.Log.Println(
                 fmt.Errorf(
-                    "error from client: %s",
+                    "HTTP Client Post Request Error: %s",
                     err.Error(),
                 ),
             )
@@ -222,7 +229,7 @@ func (adapter *types.Adapter) flushBuffer(buffer []Line) {
     if resp.StatusCode != http.StatusOK {
         adapter.Log.Println(
             fmt.Errorf(
-                "received a %s status code when sending message. response: %s",
+                "Received Status Code: %s While Sending Message.\nResponse: %s",
                 resp.StatusCode,
                 resp.Body,
             ),

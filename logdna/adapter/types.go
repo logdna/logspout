@@ -56,7 +56,7 @@ type Line struct {
     Timestamp   int64  `json:"timestamp"`
     Line        string `json:"line"`
     File        string `json:"file"`
-    Retried     uint64
+    Retried     uint64 `json:"-"`
 }
 
 // Message structure:
@@ -72,6 +72,7 @@ type Message struct {
 type ContainerInfo struct {
     Name    string          `json:"name"`
     ID      string          `json:"id"`
+    PID     string          `json:"pid",omitempty`
     Config  ContainerConfig `json:"config"`
 }
 
