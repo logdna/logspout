@@ -135,6 +135,7 @@ func (adapter *types.Adapter) Stream(logstream chan *router.Message) {
                     Line:       string(messageStr),
                     File:       m.Container.Name,
                     Timestamp:  time.Now().Unix(),
+                    Retried:    0,
                 }
             }
         }
@@ -187,18 +188,9 @@ func (adapter *types.Adapter) flushBuffer(buffer []Line) {
         adapter.Log.Println(
             fmt.Errorf(
                 "error from client: %s",
-                "following lines couldn't be encoded:",
+                err.Error(),
             ),
         )
-        for i, line := range buffer {
-            adapter.Log.Println(
-                fmt.Errorf(
-                    "%d. %s",
-                    i,
-                    line.Line,
-                ),
-            )
-        }
         return
     }
 
@@ -209,9 +201,12 @@ func (adapter *types.Adapter) flushBuffer(buffer []Line) {
     }
 
     if err != nil {
-        if err, ok := err.(net.Error); ok && err.Timeout() {
+        if _, ok := err.(net.Error); ok {
             for _, line := range buffer {
-                adapter.Queue <- line
+                if line.Retried < adapter.Limits.MaxRequestRetry {
+                    line.Retried++
+                    adapter.Queue <- line
+                }
             }
         } else {
             adapter.Log.Println(

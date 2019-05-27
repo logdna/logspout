@@ -25,9 +25,10 @@ type CustomConfiguration struct {
 
 // LimitConfiguration is SubConfiguration for Limits:
 type LimitConfiguration struct {
-    FlushInterval uint64
-    MaxBufferSize uint64
-    MaxLineLength uint64
+    FlushInterval   time.Duration
+    MaxBufferSize   uint64
+    MaxLineLength   uint64
+    MaxRequestRetry uint64
 }
 
 // HTTPClientConfiguration is for Configuring HTTP Client:
@@ -52,9 +53,10 @@ type Adapter struct {
 
 // Line structure for the queue of Adapter:
 type Line struct {
-    Timestamp int64  `json:"timestamp"`
-    Line      string `json:"line"`
-    File      string `json:"file"`
+    Timestamp   int64  `json:"timestamp"`
+    Line        string `json:"line"`
+    File        string `json:"file"`
+    Retried     uint64
 }
 
 // Message structure:

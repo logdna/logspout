@@ -75,9 +75,10 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
             Timeout:                60 * time.Second,   // 30 by Default
             TLSHandshakeTimeout:    30 * time.Second,   // 10 by Default
         }, Limits:      types.LimitConfiguration{
-            FlushInterval:  250,
-            MaxBufferSize:  2 * 1024 * 1024,
-            MaxLineLength:  16000,
+            FlushInterval:      250 * time.Millisecond,
+            MaxBufferSize:      2 * 1024 * 1024,
+            MaxLineLength:      16000,
+            MaxRequestRetry:    10,
         },
     }
 
