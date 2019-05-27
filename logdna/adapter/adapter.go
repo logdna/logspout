@@ -6,6 +6,7 @@ import (
     "encoding/json"
     "fmt"
     "log"
+    "net"
     "net/http"
     "net/url"
     "os"
@@ -26,6 +27,18 @@ func New(config types.Configuration) *types.Adapter {
         LogdnaURL:  buildLogDNAURL(config.Endpoint, config.Token),
         Queue:      make(chan types.Line),
         Config:     config,
+        HTTPClient: &http.Client{
+            Timeout:    60 * time.Second, // 30 by Default
+            Transport:  &http.Transport{
+                TLSHandshakeTimeout:    30 * time.Second, // 10 by Default
+                ExpectContinueTimeout:  5 * time.Second, // 1 by Default
+                IdleConnTimeout:        60 * time.Second, // 90 by Default
+                DialContext: (&net.Dialer{
+                    Timeout:   60 * time.Second, // 30 by Default
+                    KeepAlive: 60 * time.Second, // 30 by Default
+                }).DialContext,
+            },
+        },
     }
     go adapter.readQueue()
     return adapter
@@ -184,19 +197,25 @@ func (adapter *types.Adapter) flushBuffer(buffer []Line) {
         return
     }
 
-    resp, err := http.Post(adapter.LogdnaURL, "application/json; charset=UTF-8", &data)
+    resp, err := adapter.HTTPClient.Post(adapter.LogdnaURL, "application/json; charset=UTF-8", &data)
 
     if resp != nil {
         defer resp.Body.Close()
     }
 
     if err != nil {
-        adapter.Log.Println(
-            fmt.Errorf(
-                "error from client: %s",
-                err.Error(),
-            ),
-        )
+        if err, ok := err.(net.Error); ok && err.Timeout() {
+            for _, line := range buffer {
+                adapter.Queue <- line
+            }
+        } else {
+            adapter.Log.Println(
+                fmt.Errorf(
+                    "error from client: %s",
+                    err.Error(),
+                ),
+            )
+        }
         return
     }
 

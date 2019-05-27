@@ -3,6 +3,7 @@ package types
 
 import (
     "log"
+    "net/http"
 )
 
 // Configuration is Configuration Struct for LogDNA Adapter:
@@ -23,6 +24,7 @@ type Adapter struct {
     LogdnaURL  string
     Queue      chan Line
     Config     Configuration
+    HTTPClient http.Client
 }
 
 // Line structure for the queue of Adapter:
