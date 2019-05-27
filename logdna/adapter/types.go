@@ -4,27 +4,50 @@ package types
 import (
     "log"
     "net/http"
+    "time"
 )
 
 // Configuration is Configuration Struct for LogDNA Adapter:
 type Configuration struct {
-    Endpoint        string
-    FlushInterval   uint64
-    Hostname        string
-    MaxBufferSize   uint64
-    MaxLineLength	uint64
-    Tags            []string
-    Token           string
-    Verbose			bool
+    Custom      CustomConfiguration
+    HTTPClient  HTTPClientConfiguration
+    Limits      LimitConfiguration
+}
+
+// CustomConfiguration is Custom SubConfiguration:
+type CustomConfiguration struct {
+    Endpoint    string
+    Hostname    string
+    Tags        []string
+    Token       string
+    Verbose     bool
+}
+
+// LimitConfiguration is SubConfiguration for Limits:
+type LimitConfiguration struct {
+    FlushInterval uint64
+    MaxBufferSize uint64
+    MaxLineLength uint64
+}
+
+// HTTPClientConfiguration is for Configuring HTTP Client:
+type HTTPClientConfiguration struct {
+    DialContextTimeout      time.Duration
+    DialContextKeepAlive    time.Duration
+    ExpectContinueTimeout   time.Duration
+    IdleConnTimeout         time.Duration
+    Timeout                 time.Duration
+    TLSHandshakeTimeout     time.Duration
 }
 
 // Adapter structure:
 type Adapter struct {
-    Log        *log.Logger
-    LogdnaURL  string
-    Queue      chan Line
-    Config     Configuration
-    HTTPClient http.Client
+    Config      CustomConfiguration
+    Limits      LimitConfiguration
+    Log         *log.Logger
+    LogDNAURL   string
+    Queue       chan Line
+    HTTPClient  http.Client
 }
 
 // Line structure for the queue of Adapter:

@@ -22,19 +22,20 @@ import (
 // New method of Adapter:
 func New(config types.Configuration) *types.Adapter {
     adapter := &types.Adapter{
-        Log:        log.New(os.Stdout, config.Hostname + " ", log.LstdFlags),
-        LogdnaURL:  buildLogDNAURL(config.Endpoint, config.Token),
+        Config:     config.Custom,
+        Limits:     config.Limits,
+        Log:        log.New(os.Stdout, config.Custom.Hostname + " ", log.LstdFlags),
+        LogDNAURL:  buildLogDNAURL(config.Custom.Endpoint, config.Custom.Token),
         Queue:      make(chan types.Line),
-        Config:     config,
         HTTPClient: &http.Client{
-            Timeout:    60 * time.Second, // 30 by Default
+            Timeout:    config.HTTPClient.Timeout,
             Transport:  &http.Transport{
-                TLSHandshakeTimeout:    30 * time.Second, // 10 by Default
-                ExpectContinueTimeout:  5 * time.Second, // 1 by Default
-                IdleConnTimeout:        60 * time.Second, // 90 by Default
+                ExpectContinueTimeout:  config.HTTPClient.ExpectContinueTimeout,
+                IdleConnTimeout:        config.HTTPClient.IdleConnTimeout,
+                TLSHandshakeTimeout:    config.HTTPClient.TLSHandshakeTimeout,
                 DialContext: (&net.Dialer{
-                    Timeout:   60 * time.Second, // 30 by Default
-                    KeepAlive: 60 * time.Second, // 30 by Default
+                    KeepAlive: config.HTTPClient.DialContextKeepAlive,
+                    Timeout:   config.HTTPClient.DialContextTimeout,
                 }).DialContext,
             },
         },
@@ -96,8 +97,8 @@ func (adapter *types.Adapter) getTags(m *router.Message) string {
 }
 
 func (adapter *types.Adapter) sanitizeMessage(message string) string {
-    if uint64(len(message)) > adapter.Config.MaxLineLength {
-        return message[0:adapter.Config.MaxLineLength] + " (cut off, too long...)"
+    if uint64(len(message)) > adapter.Limits.MaxLineLength {
+        return message[0:adapter.Limits.MaxLineLength] + " (cut off, too long...)"
     }
     return message
 }
@@ -113,12 +114,12 @@ func (adapter *types.Adapter) Stream(logstream chan *router.Message) {
                     ID:     m.Container.ID,
                     Config: ContainerConfig{
                         Image:      m.Container.Config.Image,
-                        Hostname:   m.Container.Config.Hostname,
+                        Hostname:   m.Container.Config.Custom.Hostname,
                         Labels:     m.Container.Config.Labels,
                     },
                 },
                 Level:      adapter.getLevel(m.Source),
-                Hostname:   adapter.getHost(m.Container.Config.Hostname),
+                Hostname:   adapter.getHost(m.Container.Config.Custom.Hostname),
                 Tags:       adapter.getTags(m),
             })
 
@@ -143,16 +144,16 @@ func (adapter *types.Adapter) Stream(logstream chan *router.Message) {
 func (adapter *types.Adapter) readQueue() {
 
     buffer := make([]Line, 0)
-    timeout := time.NewTimer(adapter.Config.FlushInterval)
+    timeout := time.NewTimer(adapter.Limits.FlushInterval)
     bytes := 0
 
     for {
         select {
         case msg := <-adapter.Queue:
-            if bytes >= adapter.Config.MaxBufferSize {
+            if bytes >= adapter.Limits.MaxBufferSize {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
-                timeout.Reset(adapter.Config.FlushInterval)
+                timeout.Reset(adapter.Limits.FlushInterval)
                 buffer = make([]Line, 0)
                 bytes = 0
             }
@@ -163,7 +164,7 @@ func (adapter *types.Adapter) readQueue() {
         case <-timeout.C:
             if len(buffer) > 0 {
                 adapter.flushBuffer(buffer)
-                timeout.Reset(adapter.Config.FlushInterval)
+                timeout.Reset(adapter.Limits.FlushInterval)
                 buffer = make([]Line, 0)
                 bytes = 0
             }
@@ -201,7 +202,7 @@ func (adapter *types.Adapter) flushBuffer(buffer []Line) {
         return
     }
 
-    resp, err := adapter.HTTPClient.Post(adapter.LogdnaURL, "application/json; charset=UTF-8", &data)
+    resp, err := adapter.HTTPClient.Post(adapter.LogDNAURL, "application/json; charset=UTF-8", &data)
 
     if resp != nil {
         defer resp.Body.Close()

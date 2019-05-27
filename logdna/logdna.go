@@ -30,6 +30,7 @@ import (
     "os"
     "strconv"
     "strings"
+    "time"
 
     "github.com/gliderlabs/logspout/router"
     "github.com/logdna/logspout/logdna/adapter"
@@ -60,23 +61,33 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
     }
 
     config := types.Configuration{
-        Endpoint:       "logs.logdna.com/logs/ingest",
-        FlushInterval:  250,
-        Hostname:       os.Getenv("HOSTNAME"),
-        MaxBufferSize:  2 * 1024 * 1024,
-        MaxLineLength:  16000,
-        Token:          token,
-        Tags:           strings.Split(os.Getenv("TAGS"), ","),
-        Verbose:        true,
+        Custom:         types.CustomConfiguration{
+            Endpoint:   "logs.logdna.com/logs/ingest",
+            Hostname:   os.Getenv("HOSTNAME"),
+            Tags:       strings.Split(os.Getenv("TAGS"), ","),
+            Token:      token,
+            Verbose:    true,
+        }, HTTPClient:  types.HTTPClientConfiguration{
+            DialContextKeepAlive:   60 * time.Second,   // 30 by Default
+            DialContextTimeout:     60 * time.Second,   // 30 by Default
+            ExpectContinueTimeout:  5 * time.Second,    // 1 by Default
+            IdleConnTimeout:        60 * time.Second,   // 90 by Default
+            Timeout:                60 * time.Second,   // 30 by Default
+            TLSHandshakeTimeout:    30 * time.Second,   // 10 by Default
+        }, Limits:      types.LimitConfiguration{
+            FlushInterval:  250,
+            MaxBufferSize:  2 * 1024 * 1024,
+            MaxLineLength:  16000,
+        },
     }
 
     endpoint := os.Getenv("LOGDNA_URL")
     if endpoint != "" {
-        config.Endpoint = endpoint
+        config.Custom.Endpoint = endpoint
     }
 
     if (os.Getenv("VERBOSE") == "0") {
-        config.Verbose = false
+        config.Custom.Verbose = false
     }
 
     return adapter.New(config), nil
