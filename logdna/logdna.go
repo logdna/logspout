@@ -33,8 +33,7 @@ import (
     "time"
 
     "github.com/gliderlabs/logspout/router"
-    "github.com/answerbook/logspout/logdna/adapter/adapter"
-    "github.com/answerbook/logspout/logdna/adapter/types"
+    "github.com/answerbook/logspout/logdna"
 )
 
 func init() {
