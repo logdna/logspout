@@ -22,10 +22,10 @@ import (
 // New method of Adapter:
 func New(config types.Configuration) *types.Adapter {
     adapter := &types.Adapter{
-        Config:     config,
         Log:        log.New(os.Stdout, config.Hostname + " ", log.LstdFlags),
         LogdnaURL:  buildLogDNAURL(config.Endpoint, config.Token),
         Queue:      make(chan types.Line),
+        Config:     config,
     }
     go adapter.readQueue()
     return adapter

@@ -30,7 +30,6 @@ import (
     "os"
     "strconv"
     "strings"
-    "time"
 
     "github.com/gliderlabs/logspout/router"
     "github.com/logdna/logspout/logdna/adapter"
@@ -62,7 +61,7 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
 
     config := types.Configuration{
         Endpoint:       "logs.logdna.com/logs/ingest",
-        FlushInterval:  250 * time.Millisecond,
+        FlushInterval:  250,
         Hostname:       os.Getenv("HOSTNAME"),
         MaxBufferSize:  2 * 1024 * 1024,
         MaxLineLength:  16000,
