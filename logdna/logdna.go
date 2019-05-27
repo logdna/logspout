@@ -58,21 +58,21 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         return nil, errors.New("Cannot Find Environment Variable \"LOGDNA_KEY\"")
     }
 
-    config := types.Configuration{
-        Custom:         types.CustomConfiguration{
+    config := adapter.Configuration{
+        Custom:         adapter.CustomConfiguration{
             Endpoint:   "logs.logdna.com/logs/ingest",
             Hostname:   os.Getenv("HOSTNAME"),
             Tags:       strings.Split(os.Getenv("TAGS"), ","),
             Token:      token,
             Verbose:    true,
-        }, HTTPClient:  types.HTTPClientConfiguration{
+        }, HTTPClient:  adapter.HTTPClientConfiguration{
             DialContextKeepAlive:   60 * time.Second,   // 30 by Default
             DialContextTimeout:     60 * time.Second,   // 30 by Default
             ExpectContinueTimeout:  5 * time.Second,    // 1 by Default
             IdleConnTimeout:        60 * time.Second,   // 90 by Default
             Timeout:                60 * time.Second,   // 30 by Default
             TLSHandshakeTimeout:    30 * time.Second,   // 10 by Default
-        }, Limits:      types.LimitConfiguration{
+        }, Limits:      adapter.LimitConfiguration{
             FlushInterval:      250 * time.Millisecond,
             MaxBufferSize:      2 * 1024 * 1024,
             MaxLineLength:      16000,

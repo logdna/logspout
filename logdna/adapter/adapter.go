@@ -17,13 +17,13 @@ import (
 )
 
 // New method of Adapter:
-func New(config types.Configuration) *types.Adapter {
-    adapter := &types.Adapter{
+func New(config Configuration) *Adapter {
+    adapter := &Adapter{
         Config:     config.Custom,
         Limits:     config.Limits,
         Log:        log.New(os.Stdout, config.Custom.Hostname + " ", log.LstdFlags),
         LogDNAURL:  buildLogDNAURL(config.Custom.Endpoint, config.Custom.Token),
-        Queue:      make(chan types.Line),
+        Queue:      make(chan Line),
         HTTPClient: &http.Client{
             Timeout:    config.HTTPClient.Timeout,
             Transport:  &http.Transport{
@@ -41,7 +41,7 @@ func New(config types.Configuration) *types.Adapter {
     return adapter
 }
 
-func (adapter *types.Adapter) getLevel(source string) string {
+func (adapter *Adapter) getLevel(source string) string {
     switch source {
     case "stdout":
         return "INFO"
@@ -51,7 +51,7 @@ func (adapter *types.Adapter) getLevel(source string) string {
     return ""
 }
 
-func (adapter *types.Adapter) getHost(containerHostname string) string {
+func (adapter *Adapter) getHost(containerHostname string) string {
     host := containerHostname
     if (adapter.Config.Hostname != "") {
         host = adapter.Config.Hostname
@@ -59,7 +59,7 @@ func (adapter *types.Adapter) getHost(containerHostname string) string {
     return host
 }
 
-func (adapter *types.Adapter) getTags(m *router.Message) string {
+func (adapter *Adapter) getTags(m *router.Message) string {
     
     var listTags []string
     existenceMap := map[string]bool{}
@@ -93,7 +93,7 @@ func (adapter *types.Adapter) getTags(m *router.Message) string {
     return strings.Join(listTags, ",")
 }
 
-func (adapter *types.Adapter) sanitizeMessage(message string) string {
+func (adapter *Adapter) sanitizeMessage(message string) string {
     if uint64(len(message)) > adapter.Limits.MaxLineLength {
         return message[0:adapter.Limits.MaxLineLength] + " (cut off, too long...)"
     }
@@ -101,7 +101,7 @@ func (adapter *types.Adapter) sanitizeMessage(message string) string {
 }
 
 // Stream method is for streaming the messages:
-func (adapter *types.Adapter) Stream(logstream chan *router.Message) {
+func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
         if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
             msg := Message{
@@ -146,7 +146,7 @@ func (adapter *types.Adapter) Stream(logstream chan *router.Message) {
     }
 }
 
-func (adapter *types.Adapter) readQueue() {
+func (adapter *Adapter) readQueue() {
 
     buffer := make([]Line, 0)
     timeout := time.NewTimer(adapter.Limits.FlushInterval)
@@ -177,7 +177,7 @@ func (adapter *types.Adapter) readQueue() {
     }
 }
 
-func (adapter *types.Adapter) flushBuffer(buffer []Line) {
+func (adapter *Adapter) flushBuffer(buffer []Line) {
     var data bytes.Buffer
 
     body := struct {
