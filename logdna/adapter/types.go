@@ -1,5 +1,5 @@
-// Package types defines the types used in LogDNA LogSpout Adapter
-package types
+// Package adapter is the implementation of LogDNA LogSpout Adapter
+package adapter
 
 import (
     "log"
