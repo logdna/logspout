@@ -14,7 +14,6 @@ import (
     "strings"
     "text/template"
     "time"
-    "unsafe"
 
     "github.com/gliderlabs/logspout/router"
     "github.com/logdna/logspout/logdna/types"
@@ -145,21 +144,26 @@ func (adapter *types.Adapter) readQueue() {
 
     buffer := make([]Line, 0)
     timeout := time.NewTimer(adapter.Config.FlushInterval)
+    bytes := 0
+
     for {
         select {
         case msg := <-adapter.Queue:
-            if unsafe.Sizeof(buffer) >= adapter.Config.MaxBufferSize {
+            if bytes >= adapter.Config.MaxBufferSize {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
                 buffer = make([]Line, 0)
+                bytes = 0
             }
 
             buffer = append(buffer, msg)
+            bytes += len(msg.Line)
 
         case <-timeout.C:
             if len(buffer) > 0 {
                 adapter.flushBuffer(buffer)
                 buffer = make([]Line, 0)
+                bytes = 0
             }
         }
 
