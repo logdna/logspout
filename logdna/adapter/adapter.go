@@ -16,7 +16,7 @@ import (
     "time"
 
     "github.com/gliderlabs/logspout/router"
-    "github.com/logdna/logspout/logdna/types"
+    "github.com/answerbook/logspout/logdna/types"
 )
 
 // New method of Adapter:
