@@ -72,7 +72,7 @@ type Message struct {
 type ContainerInfo struct {
     Name    string          `json:"name"`
     ID      string          `json:"id"`
-    PID     string          `json:"pid",omitempty`
+    PID     int             `json:"pid",omitempty`
     Config  ContainerConfig `json:"config"`
 }
 

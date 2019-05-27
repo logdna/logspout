@@ -106,7 +106,7 @@ func (adapter *Adapter) sanitizeMessage(message string) string {
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
         if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
-            msg := Message{
+            messageStr, err := json.Marshal(Message{
                 Message:    adapter.sanitizeMessage(m.Data),
                 Container:  ContainerInfo{
                     Name:   m.Container.Name,
@@ -121,13 +121,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
                 Level:      adapter.getLevel(m.Source),
                 Hostname:   adapter.getHost(m.Container.Config.Hostname),
                 Tags:       adapter.getTags(m),
-            }
-
-            if m.Priority {
-                msg.Level = m.Priority
-            }
-
-            messageStr, err := json.Marshal(msg)
+            })
 
             if err != nil {
                 adapter.Log.Println(
