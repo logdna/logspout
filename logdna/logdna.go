@@ -28,9 +28,11 @@ import (
     "errors"
     "log"
     "os"
-    "strconv"
     "strings"
     "time"
+
+    "github.com/gliderlabs/logspout/router"
+    "github.com/answerbook/logspout/logdna/adapter"
 )
 
 func init() {
