@@ -31,9 +31,6 @@ import (
     "strconv"
     "strings"
     "time"
-
-    "github.com/gliderlabs/logspout/router"
-    "github.com/answerbook/logspout/logdna/"
 )
 
 func init() {

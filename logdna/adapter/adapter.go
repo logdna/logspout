@@ -14,9 +14,6 @@ import (
     "strings"
     "text/template"
     "time"
-
-    "github.com/gliderlabs/logspout/router"
-    "github.com/answerbook/logspout/logdna"
 )
 
 // New method of Adapter:
