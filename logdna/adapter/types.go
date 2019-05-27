@@ -48,7 +48,7 @@ type Adapter struct {
     Log         *log.Logger
     LogDNAURL   string
     Queue       chan Line
-    HTTPClient  http.Client
+    HTTPClient  *http.Client
 }
 
 // Line structure for the queue of Adapter:
