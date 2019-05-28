@@ -20,6 +20,7 @@ import (
 
 // New method of Adapter:
 func New(config Configuration) *Adapter {
+    log.Println("I'm in Adapter")
     adapter := &Adapter{
         Config:     config.Custom,
         Limits:     config.Limits,
@@ -39,6 +40,7 @@ func New(config Configuration) *Adapter {
             },
         },
     }
+    log.Println("Calling readQueue")
     go adapter.readQueue()
     return adapter
 }
@@ -156,6 +158,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 
 func (adapter *Adapter) readQueue() {
 
+    log.Println("I am in readQueue")
     buffer := make([]Line, 0)
     timeout := time.NewTimer(adapter.Limits.FlushInterval)
     bytes := 0
@@ -164,11 +167,9 @@ func (adapter *Adapter) readQueue() {
         select {
         case msg := <-adapter.Queue:
             adapter.Log.Println(
-                fmt.Printf(
-                    "%s ? %s",
-                    string(bytes),
-                    string(adapter.Limits.MaxBufferSize),
-                ),
+                "%s ? %s",
+                string(bytes),
+                string(adapter.Limits.MaxBufferSize),
             )
             if uint64(bytes) >= adapter.Limits.MaxBufferSize {
                 timeout.Stop()
@@ -217,11 +218,9 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
     if resp != nil {
         adapter.Log.Println(
-            fmt.Println(
-                "Received Status Code: %s While Sending Message.\nResponse: %s",
-                resp.StatusCode,
-                resp.Body,
-            ),
+            "Received Status Code: %s While Sending Message.\nResponse: %s",
+            resp.StatusCode,
+            resp.Body,
         )
         defer resp.Body.Close()
     }
