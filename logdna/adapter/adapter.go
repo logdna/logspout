@@ -151,6 +151,13 @@ func (adapter *Adapter) readQueue() {
     for {
         select {
         case msg := <-adapter.Queue:
+            adapter.Log.Println(
+                fmt.Printf(
+                    "%s ? %s",
+                    string(bytes),
+                    string(adapter.Limits.MaxBufferSize),
+                ),
+            )
             if uint64(bytes) >= adapter.Limits.MaxBufferSize {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
@@ -197,6 +204,12 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     resp, err := adapter.HTTPClient.Post(adapter.LogDNAURL, "application/json; charset=UTF-8", &data)
 
     if resp != nil {
+        adapter.Log.Println(
+            fmt.Println("Received Status Code: %s While Sending Message.\nResponse: %s",
+                resp.StatusCode,
+                resp.Body,
+            )
+        )
         defer resp.Body.Close()
     }
 
