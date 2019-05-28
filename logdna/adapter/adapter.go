@@ -27,16 +27,16 @@ func New(config Configuration) *Adapter {
         LogDNAURL:  buildLogDNAURL(config.Custom.Endpoint, config.Custom.Token),
         Queue:      make(chan Line),
         HTTPClient: &http.Client{
-            Timeout:    config.HTTPClient.Timeout,
-            Transport:  &http.Transport{
-                ExpectContinueTimeout:  config.HTTPClient.ExpectContinueTimeout,
-                IdleConnTimeout:        config.HTTPClient.IdleConnTimeout,
-                TLSHandshakeTimeout:    config.HTTPClient.TLSHandshakeTimeout,
-                DialContext: (&net.Dialer{
-                    KeepAlive: config.HTTPClient.DialContextKeepAlive,
-                    Timeout:   config.HTTPClient.DialContextTimeout,
-                }).DialContext,
-            },
+//            Timeout:    config.HTTPClient.Timeout,
+//            Transport:  &http.Transport{
+//                ExpectContinueTimeout:  config.HTTPClient.ExpectContinueTimeout,
+//                IdleConnTimeout:        config.HTTPClient.IdleConnTimeout,
+//                TLSHandshakeTimeout:    config.HTTPClient.TLSHandshakeTimeout,
+//                DialContext: (&net.Dialer{
+//                    KeepAlive: config.HTTPClient.DialContextKeepAlive,
+//                    Timeout:   config.HTTPClient.DialContextTimeout,
+//                }).DialContext,
+//            },
         },
     }
     go adapter.readQueue()
