@@ -108,7 +108,8 @@ func (adapter *Adapter) sanitizeMessage(message string) string {
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     log.Print("Log Stream: ", logstream)
     for m := range logstream {
-        if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
+        log.Print("Message: ", m.Data)
+//        if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
             messageStr, err := json.Marshal(Message{
                 Message:    adapter.sanitizeMessage(m.Data),
                 Container:  ContainerInfo{
@@ -141,7 +142,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
                     Retried:    0,
                 }
             }
-        }
+//        }
     }
 }
 
@@ -155,11 +156,6 @@ func (adapter *Adapter) readQueue() {
     for {
         select {
         case msg := <-adapter.Queue:
-            adapter.Log.Println(
-                "%s ? %s",
-                string(bytes),
-                string(adapter.Limits.MaxBufferSize),
-            )
             if uint64(bytes) >= adapter.Limits.MaxBufferSize {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
@@ -206,11 +202,6 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     resp, err := adapter.HTTPClient.Post(adapter.LogDNAURL, "application/json; charset=UTF-8", &data)
 
     if resp != nil {
-        adapter.Log.Println(
-            "Received Status Code: %s While Sending Message.\nResponse: %s",
-            resp.StatusCode,
-            resp.Body,
-        )
         defer resp.Body.Close()
     }
 
