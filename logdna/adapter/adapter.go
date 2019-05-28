@@ -159,7 +159,7 @@ func (adapter *Adapter) readQueue() {
             if uint64(bytes) >= adapter.Limits.MaxBufferSize {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
-                timeout.Reset(adapter.Limits.FlushInterval)
+//                timeout.Reset(adapter.Limits.FlushInterval)
                 buffer = make([]Line, 0)
                 bytes = 0
             }
@@ -170,11 +170,13 @@ func (adapter *Adapter) readQueue() {
         case <-timeout.C:
             if len(buffer) > 0 {
                 adapter.flushBuffer(buffer)
-                timeout.Reset(adapter.Limits.FlushInterval)
+//                timeout.Reset(adapter.Limits.FlushInterval)
                 buffer = make([]Line, 0)
                 bytes = 0
             }
         }
+
+        timeout.Reset(flushTimeout)
     }
 }
 
