@@ -20,7 +20,6 @@ import (
 
 // New method of Adapter:
 func New(config Configuration) *Adapter {
-    log.Println("I'm in Adapter")
     adapter := &Adapter{
         Config:     config.Custom,
         Limits:     config.Limits,
@@ -40,11 +39,11 @@ func New(config Configuration) *Adapter {
             },
         },
     }
-    log.Println("Calling readQueue")
     go adapter.readQueue()
     return adapter
 }
 
+// getLevel method is for specifying the Level:
 func (adapter *Adapter) getLevel(source string) string {
     switch source {
     case "stdout":
@@ -55,6 +54,7 @@ func (adapter *Adapter) getLevel(source string) string {
     return ""
 }
 
+// getHost method is for deciding what to choose as a hostname:
 func (adapter *Adapter) getHost(containerHostname string) string {
     host := containerHostname
     if (adapter.Config.Hostname != "") {
@@ -63,6 +63,7 @@ func (adapter *Adapter) getHost(containerHostname string) string {
     return host
 }
 
+// getTags method is for extracting the tags from templates:
 func (adapter *Adapter) getTags(m *router.Message) string {
     
     var listTags []string
@@ -97,6 +98,7 @@ func (adapter *Adapter) getTags(m *router.Message) string {
     return strings.Join(listTags, ",")
 }
 
+// sanitizeMessage is a method for sanitizing the log message:
 func (adapter *Adapter) sanitizeMessage(message string) string {
     if uint64(len(message)) > adapter.Limits.MaxLineLength {
         return message[0:adapter.Limits.MaxLineLength] + " (cut off, too long...)"
@@ -106,10 +108,8 @@ func (adapter *Adapter) sanitizeMessage(message string) string {
 
 // Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
-    log.Print("Log Stream: ", logstream)
     for m := range logstream {
-        log.Print("Message: ", m.Data)
-//        if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
+        if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
             messageStr, err := json.Marshal(Message{
                 Message:    adapter.sanitizeMessage(m.Data),
                 Container:  ContainerInfo{
@@ -142,13 +142,13 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
                     Retried:    0,
                 }
             }
-//        }
+        }
     }
 }
 
+// readQueue is a method for reading from queue:
 func (adapter *Adapter) readQueue() {
 
-    log.Println("I am in readQueue")
     buffer := make([]Line, 0)
     timeout := time.NewTimer(adapter.Limits.FlushInterval)
     bytes := 0
@@ -178,6 +178,7 @@ func (adapter *Adapter) readQueue() {
     }
 }
 
+// flushBuffer is a method for flushing the lines:
 func (adapter *Adapter) flushBuffer(buffer []Line) {
     var data bytes.Buffer
 

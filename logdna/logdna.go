@@ -89,9 +89,7 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         config.Custom.Verbose = false
     }
 
-    // os.Setenv("INACTIVITY_TIMEOUT", "1m")
-
-    log.Print("Configuration: ", config)
+    os.Setenv("INACTIVITY_TIMEOUT", "1m")
 
     return adapter.New(config), nil
 }
