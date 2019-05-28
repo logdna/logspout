@@ -205,10 +205,11 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
     if resp != nil {
         adapter.Log.Println(
-            fmt.Println("Received Status Code: %s While Sending Message.\nResponse: %s",
+            fmt.Println(
+                "Received Status Code: %s While Sending Message.\nResponse: %s",
                 resp.StatusCode,
                 resp.Body,
-            )
+            ),
         )
         defer resp.Body.Close()
     }
