@@ -176,7 +176,7 @@ func (adapter *Adapter) readQueue() {
             }
         }
 
-        timeout.Reset(flushTimeout)
+        timeout.Reset(adapter.Limits.FlushInterval)
     }
 }
 
