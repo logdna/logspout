@@ -106,20 +106,9 @@ func (adapter *Adapter) sanitizeMessage(message string) string {
 
 // Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
+    log.Print("Log Stream: ", logstream)
     for m := range logstream {
-        adapter.Log.Println(
-            fmt.Printf(
-                "Message: %s",
-                m.Data,
-            ),
-        )
         if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
-            adapter.Log.Println(
-                fmt.Printf(
-                    "Message after If: %s",
-                    m.Data,
-                ),
-            )
             messageStr, err := json.Marshal(Message{
                 Message:    adapter.sanitizeMessage(m.Data),
                 Container:  ContainerInfo{
