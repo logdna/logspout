@@ -40,10 +40,10 @@ func init() {
 
     r := &router.Route{
         Adapter:        "logdna",
-        FilterName:     os.Getenv("FILTER_NAME"),
-        FilterID:       os.Getenv("FILTER_ID"),
-        FilterLabels:   strings.Split(os.Getenv("FILTER_LABELS"), ","),
-        FilterSources:  strings.Split(os.Getenv("FILTER_SOURCES"), ","),
+//        FilterName:     os.Getenv("FILTER_NAME"),
+//        FilterID:       os.Getenv("FILTER_ID"),
+//        FilterLabels:   strings.Split(os.Getenv("FILTER_LABELS"), ","),
+//        FilterSources:  strings.Split(os.Getenv("FILTER_SOURCES"), ","),
     }
 
     if err := router.Routes.Add(r); err != nil {
