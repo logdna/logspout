@@ -29,7 +29,6 @@ func New(config Configuration) *Adapter {
         HTTPClient: &http.Client{
             Timeout:    config.HTTPClient.Timeout,
             Transport:  &http.Transport{
-                ExpectContinueTimeout:  config.HTTPClient.ExpectContinueTimeout,
                 IdleConnTimeout:        config.HTTPClient.IdleConnTimeout,
                 TLSHandshakeTimeout:    config.HTTPClient.TLSHandshakeTimeout,
                 DialContext: (&net.Dialer{

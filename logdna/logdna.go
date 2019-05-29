@@ -79,7 +79,6 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         }, HTTPClient:  adapter.HTTPClientConfiguration{
             DialContextKeepAlive:   getDurationOpt("DIAL_KEEP_ALIVE", 60) * time.Second,        // 30 by Default
             DialContextTimeout:     getDurationOpt("DIAL_TIMEOUT", 60) * time.Second,           // 30 by Default
-            ExpectContinueTimeout:  getDurationOpt("EXPECT_CONTINUE_TIMEOUT", 5) * time.Second, // 1 by Default
             IdleConnTimeout:        getDurationOpt("IDLE_CONN_TIMEOUT", 60) * time.Second,      // 90 by Default
             Timeout:                getDurationOpt("HTTP_CLIENT_TIMEOUT", 60) * time.Second,    // 30 by Default
             TLSHandshakeTimeout:    getDurationOpt("TLS_HANDSHAKE_TIMEOUT", 30) * time.Second,   // 10 by Default
