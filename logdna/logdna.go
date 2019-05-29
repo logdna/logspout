@@ -38,12 +38,27 @@ import (
 func init() {
     router.AdapterFactories.Register(NewLogDNAAdapter, "logdna")
 
+    filterLabels := make([]string, 0)
+    filterLabelsValue := os.Getenv("FILTER_LABELS")
+    if filterLabelsValue != "" {
+        filterLabels = strings.Split(filterLabelsValue, ",")
+    }
+
+    filterSources := make([]string, 0)
+    filterSourcesValue := os.Getenv("FILTER_SOURCES")
+    if filterSourcesValue != "" {
+        filterSources = strings.Split(filterSourcesValue, ",")
+    }
+
+    filterID := os.Getenv("FILTER_ID")
+    filterName := os.Getenv("FILTER_NAME")
+
     r := &router.Route{
         Adapter:        "logdna",
-//        FilterName:     os.Getenv("FILTER_NAME"),
-//        FilterID:       os.Getenv("FILTER_ID"),
-//        FilterLabels:   strings.Split(os.Getenv("FILTER_LABELS"), ","),
-//        FilterSources:  strings.Split(os.Getenv("FILTER_SOURCES"), ","),
+        FilterName:     filterName,
+        FilterID:       filterID,
+        FilterLabels:   filterLabels,
+        FilterSources:  filterSources,
     }
 
     if err := router.Routes.Add(r); err != nil {
@@ -89,7 +104,7 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         config.Custom.Verbose = false
     }
 
-    // os.Setenv("INACTIVITY_TIMEOUT", "1m")
+    os.Setenv("INACTIVITY_TIMEOUT", "1m")
 
     return adapter.New(config), nil
 }

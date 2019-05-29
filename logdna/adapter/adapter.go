@@ -151,32 +151,30 @@ func (adapter *Adapter) readQueue() {
 
     buffer := make([]Line, 0)
     timeout := time.NewTimer(adapter.Limits.FlushInterval)
-    bytes := 0
+    byteSize := 0
 
     for {
         select {
         case msg := <-adapter.Queue:
-            if uint64(bytes) >= adapter.Limits.MaxBufferSize {
+            if uint64(byteSize) >= adapter.Limits.MaxBufferSize {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
-//                timeout.Reset(adapter.Limits.FlushInterval)
+                timeout.Reset(adapter.Limits.FlushInterval)
                 buffer = make([]Line, 0)
-                bytes = 0
+                byteSize = 0
             }
 
             buffer = append(buffer, msg)
-            bytes += len(msg.Line)
+            byteSize += len(msg.Line)
 
         case <-timeout.C:
             if len(buffer) > 0 {
                 adapter.flushBuffer(buffer)
-//                timeout.Reset(adapter.Limits.FlushInterval)
+                timeout.Reset(adapter.Limits.FlushInterval)
                 buffer = make([]Line, 0)
-                bytes = 0
+                byteSize = 0
             }
         }
-
-        timeout.Reset(adapter.Limits.FlushInterval)
     }
 }
 
@@ -248,84 +246,4 @@ func buildLogDNAURL(baseURL, token string) string {
 
     ldnaURL := "https://" + baseURL + "?" + v.Encode()
     return ldnaURL
-}
-
-/*
-    Definitions of All Structs
-*/
-
-// Configuration is Configuration Struct for LogDNA Adapter:
-type Configuration struct {
-    Custom      CustomConfiguration
-    HTTPClient  HTTPClientConfiguration
-    Limits      LimitConfiguration
-}
-
-// CustomConfiguration is Custom SubConfiguration:
-type CustomConfiguration struct {
-    Endpoint    string
-    Hostname    string
-    Tags        []string
-    Token       string
-    Verbose     bool
-}
-
-// LimitConfiguration is SubConfiguration for Limits:
-type LimitConfiguration struct {
-    FlushInterval   time.Duration
-    MaxBufferSize   uint64
-    MaxLineLength   uint64
-    MaxRequestRetry uint64
-}
-
-// HTTPClientConfiguration is for Configuring HTTP Client:
-type HTTPClientConfiguration struct {
-    DialContextTimeout      time.Duration
-    DialContextKeepAlive    time.Duration
-    ExpectContinueTimeout   time.Duration
-    IdleConnTimeout         time.Duration
-    Timeout                 time.Duration
-    TLSHandshakeTimeout     time.Duration
-}
-
-// Adapter structure:
-type Adapter struct {
-    Config      CustomConfiguration
-    Limits      LimitConfiguration
-    Log         *log.Logger
-    LogDNAURL   string
-    Queue       chan Line
-    HTTPClient  *http.Client
-}
-
-// Line structure for the queue of Adapter:
-type Line struct {
-    Timestamp   int64  `json:"timestamp"`
-    Line        string `json:"line"`
-    File        string `json:"file"`
-    Retried     uint64 `json:"-"`
-}
-
-// Message structure:
-type Message struct {
-    Message     string        `json:"message"`
-    Container   ContainerInfo `json:"container"`
-    Level       string        `json:"level"`
-    Hostname    string        `json:"hostname"`
-    Tags        string        `json:"tags"`
-}
-
-// ContainerInfo structure for the Container of Message:
-type ContainerInfo struct {
-    Name    string          `json:"name"`
-    ID      string          `json:"id"`
-    PID     int             `json:"pid",omitempty`
-    Config  ContainerConfig `json:"config"`
-}
-
-// ContainerConfig structure for the Config of ContainerInfo:
-type ContainerConfig struct {
-    Image       string              `json:"image"`
-    Hostname    string              `json:"hostname"`
-    Labels      map[string]string   `json:"labels"`
 }
