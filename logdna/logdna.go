@@ -40,24 +40,19 @@ func init() {
     router.AdapterFactories.Register(NewLogDNAAdapter, "logdna")
 
     filterLabels := make([]string, 0)
-    filterLabelsValue := os.Getenv("FILTER_LABELS")
-    if filterLabelsValue != "" {
+    if filterLabelsValue := os.Getenv("FILTER_LABELS"); filterLabelsValue != "" {
         filterLabels = strings.Split(filterLabelsValue, ",")
     }
 
     filterSources := make([]string, 0)
-    filterSourcesValue := os.Getenv("FILTER_SOURCES")
-    if filterSourcesValue != "" {
+    if filterSourcesValue := os.Getenv("FILTER_SOURCES"); filterSourcesValue != "" {
         filterSources = strings.Split(filterSourcesValue, ",")
     }
 
-    filterID := os.Getenv("FILTER_ID")
-    filterName := os.Getenv("FILTER_NAME")
-
     r := &router.Route{
         Adapter:        "logdna",
-        FilterName:     filterName,
-        FilterID:       filterID,
+        FilterName:     getStringOpt("FILTER_NAME", ""),
+        FilterID:       getStringOpt("FILTER_ID", ""),
         FilterLabels:   filterLabels,
         FilterSources:  filterSources,
     }
@@ -89,7 +84,7 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
             Timeout:                getDurationOpt("HTTP_CLIENT_TIMEOUT", 5) * time.Second,    // 30 by Default
             TLSHandshakeTimeout:    getDurationOpt("TLS_HANDSHAKE_TIMEOUT", 1) * time.Second,   // 10 by Default
         }, Limits:      adapter.LimitConfiguration{
-            FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
+            FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 1000) * time.Millisecond,
             MaxBufferSize:      getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
             MaxLineLength:      getUintOpt("MAX_LINE_LENGTH", 16000),
             MaxRequestRetry:    getUintOpt("MAX_REQUEST_RETRY", 10),

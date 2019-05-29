@@ -205,11 +205,6 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
     resp, err := adapter.HTTPClient.Post(adapter.LogDNAURL, "application/json; charset=UTF-8", &data)
 
-    if resp != nil {
-        adapter.Log.Print("Received Status Code: ", resp.StatusCode)
-        defer resp.Body.Close()
-    }
-
     if err != nil {
         if _, ok := err.(net.Error); ok {
             adapter.retry(buffer)
@@ -221,15 +216,20 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
                 ),
             )
         }
+        return
     }
 
-    if resp.StatusCode != http.StatusOK {
-        adapter.Log.Println(
-            fmt.Errorf(
-                "Received Status Code: %s While Sending Message",
-                resp.StatusCode,
-            ),
-        )
+    if resp != nil {
+        if resp.StatusCode != http.StatusOK {
+            adapter.Log.Println(
+                fmt.Errorf(
+                    "Received Status Code: %s While Sending Message",
+                    resp.StatusCode,
+                ),
+            )
+        }
+        adapter.Log.Print("Received Status Code: ", resp.StatusCode)
+        defer resp.Body.Close()
     }
 }
 
