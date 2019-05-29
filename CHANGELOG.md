@@ -6,8 +6,8 @@ This file documents all notable changes in `LogDNA LogSpout Image`. The release 
 
 * Added Tagged Build;
 * Added [Semantic Versioning](http://semver.org);
-* Added [CHANGELOG.md](https://github.com/logdna/logspout/blob/master/CHANGELOG.md);
-* Updated [LICENSE](https://github.com/logdna/logspout/blob/master/LICENSE);
+* Added [`CHANGELOG.md`](https://github.com/logdna/logspout/blob/master/CHANGELOG.md);
+* Updated [`LICENSE`](https://github.com/logdna/logspout/blob/master/LICENSE);
 * Enriched the Adapter Configuration;
 * Added 11 New Environment Variable Options;
 * Implemented Retry Mechanism;

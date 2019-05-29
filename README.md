@@ -10,8 +10,8 @@ A Docker LogSpout image to stream logs from your containers to LogDNA.
 
 * Added Tagged Build;
 * Added [Semantic Versioning](http://semver.org);
-* Added [CHANGELOG.md](https://github.com/logdna/logspout/blob/master/CHANGELOG.md);
-* Updated [LICENSE](https://github.com/logdna/logspout/blob/master/LICENSE);
+* Added [`CHANGELOG.md`](https://github.com/logdna/logspout/blob/master/CHANGELOG.md);
+* Updated [`LICENSE`](https://github.com/logdna/logspout/blob/master/LICENSE);
 * Enriched the Adapter Configuration;
 * Added 11 New Environment Variable Options;
 * Implemented Retry Mechanism;
@@ -54,7 +54,7 @@ __Note__: More information can be found [here](https://github.com/gliderlabs/log
   * __Default__: Enabled
   * __Note__: `0` to Disable
 
-__Note__: Logging the `LogSpout` Container is recommended to keep track of HTTP Request Error or Exceptions.
+__Note__: Logging the `LogSpout` Container is recommended to keep track of HTTP Request Errors or Exceptions.
 
 #### Related to HTTP Client
 * __DIAL_KEEP_ALIVE__: The interval (in `seconds`) between keep-alive probes for an active network connection.
@@ -76,10 +76,10 @@ __Note__: Logging the `LogSpout` Container is recommended to keep track of HTTP 
 #### Limits
 * __FLUSH_INTERVAL__: How frequently batches of logs are sent (in `milliseconds`), *Optional*
   * __Default__: 250
-* __INACTIVITY_TIMEOUT__: The timeout to detect failure in `Docker API` and restart, *Optional*
+* __INACTIVITY_TIMEOUT__: How long to wait for inactivity before declaring failure in the `Docker API` and restarting, *Optional*
   * __Default__: 1m
   * __Note__: More information about the possible values can be found [here](https://github.com/gliderlabs/logspout#detecting-timeouts-in-docker-log-streams). Also see [`time.ParseDuration`](https://golang.org/pkg/time/#ParseDuration) for valid format as recommended [here](https://github.com/gliderlabs/logspout/blob/e671009d9df10e8139f6a4bea8adc9c7878ff4e9/router/pump.go#L112-L116).
-* __MAX_BUFFER_SIZE__: The maximum byte size (in `mb`) of the batch to ship to `LogDNA`, *Optional*
+* __MAX_BUFFER_SIZE__: The maximum size (in `mb`) of the batch to ship to `LogDNA`, *Optional*
   * __Default__: 2
 * __MAX_LINE_LENGTH__: The maximum character length for each line, *Optional*
   * __Default__: 16000
