@@ -237,6 +237,8 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 func (adapter *Adapter) retry(buffer []Line) {
     adapter.Log.Print("Retrying...")
     for _, line := range buffer {
+        adapter.Log.Print(line.Retried)
+        adapter.Log.Print(adapter.Limits.MaxRequestRetry)
         if line.Retried < adapter.Limits.MaxRequestRetry {
             line.Retried++
             adapter.Queue <- line
