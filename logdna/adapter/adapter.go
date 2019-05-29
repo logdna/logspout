@@ -228,17 +228,13 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
                 ),
             )
         }
-        adapter.Log.Print("Received Status Code: ", resp.StatusCode)
         defer resp.Body.Close()
     }
 }
 
 // retry sending the buffer:
 func (adapter *Adapter) retry(buffer []Line) {
-    adapter.Log.Print("Retrying...")
     for _, line := range buffer {
-        adapter.Log.Print(line.Retried)
-        adapter.Log.Print(adapter.Limits.MaxRequestRetry)
         if line.Retried < adapter.Limits.MaxRequestRetry {
             line.Retried++
             adapter.Queue <- line

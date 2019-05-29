@@ -77,14 +77,14 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
             Token:      token,
             Verbose:    os.Getenv("VERBOSE") != "0",
         }, HTTPClient:  adapter.HTTPClientConfiguration{
-            DialContextKeepAlive:   getDurationOpt("DIAL_KEEP_ALIVE", 5) * time.Second,        // 30 by Default
-            DialContextTimeout:     getDurationOpt("DIAL_TIMEOUT", 5) * time.Second,           // 30 by Default
-            ExpectContinueTimeout:  getDurationOpt("EXPECT_CONTINUE_TIMEOUT", 1) * time.Second, // 1 by Default
+            DialContextKeepAlive:   getDurationOpt("DIAL_KEEP_ALIVE", 60) * time.Second,        // 30 by Default
+            DialContextTimeout:     getDurationOpt("DIAL_TIMEOUT", 60) * time.Second,           // 30 by Default
+            ExpectContinueTimeout:  getDurationOpt("EXPECT_CONTINUE_TIMEOUT", 5) * time.Second, // 1 by Default
             IdleConnTimeout:        getDurationOpt("IDLE_CONN_TIMEOUT", 60) * time.Second,      // 90 by Default
-            Timeout:                getDurationOpt("HTTP_CLIENT_TIMEOUT", 5) * time.Second,    // 30 by Default
-            TLSHandshakeTimeout:    getDurationOpt("TLS_HANDSHAKE_TIMEOUT", 1) * time.Second,   // 10 by Default
+            Timeout:                getDurationOpt("HTTP_CLIENT_TIMEOUT", 60) * time.Second,    // 30 by Default
+            TLSHandshakeTimeout:    getDurationOpt("TLS_HANDSHAKE_TIMEOUT", 30) * time.Second,   // 10 by Default
         }, Limits:      adapter.LimitConfiguration{
-            FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 1000) * time.Millisecond,
+            FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
             MaxBufferSize:      getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
             MaxLineLength:      getUintOpt("MAX_LINE_LENGTH", 16000),
             MaxRequestRetry:    getUintOpt("MAX_REQUEST_RETRY", 10),
