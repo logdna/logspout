@@ -16,10 +16,10 @@ jobs:
               echo "  CLOG_VERSION: ${CLOG_VERSION}"
               exit 1
             fi
-            echo 'export VERSION=${TAG_VERSION}' >> ${BASH_ENV}
       - run:
           name: Build Docker Image
           command: |
+            VERSION=$(git tag -l --sort=-v:refname | head -n 1 | cut -d'-' -f2)
             docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} -t ${USERNAME}/${IMAGE}:${VERSION} .
       - run:
           name: Authenticate with Docker Hub
@@ -33,7 +33,5 @@ workflows:
     jobs:
       - publish:
           filters:
-            branches:
-              only: master
             tags:
               only: /[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?/
