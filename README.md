@@ -9,15 +9,15 @@ A Docker LogSpout image to stream logs from your containers to LogDNA.
 ### v1.2.0 - Released on May 29, 2019
 
 * Added Tagged Build;
-* Added [`Semantic Versioning`](http://semver.org);
-* Added [`CHANGELOG.md`](https://github.com/logdna/logspout/blob/master/CHANGELOG.md);
-* Updated [`LICENSE`](https://github.com/logdna/logspout/blob/master/LICENSE);
+* Added [Semantic Versioning](http://semver.org);
+* Added [CHANGELOG.md](https://github.com/logdna/logspout/blob/master/CHANGELOG.md);
+* Updated [LICENSE](https://github.com/logdna/logspout/blob/master/LICENSE);
 * Enriched the Adapter Configuration;
 * Added 11 New Environment Variable Options;
-* Implemented `Retry` Mechanism;
+* Implemented Retry Mechanism;
 * Added Message Sanitization;
 * Added Capturing `m.Container.State.Pid`;
-* Changed Buffer Limit from the Length to the `Byte Size`;
+* Changed Buffer Limit from the Length to the Byte Size;
 * Polished Some Debug Statements.
 
 ### v1.1.0 - Released on December 06, 2018
@@ -32,7 +32,7 @@ A Docker LogSpout image to stream logs from your containers to LogDNA.
 
 ### Environment Variables
 
-The following variables can be used to tune the `LogSpout` for the specific use case.
+The following variables can be used to tune `LogSpout` for specific use cases.
 
 #### Log Router Specific
 
@@ -54,10 +54,10 @@ __Note__: More information can be found [here](https://github.com/gliderlabs/log
   * __Default__: Enabled
   * __Note__: `0` to Disable
 
-__Note__: Logging `LogSpout` Container is recommended to keep track of the HTTP Request Error or Exceptions.
+__Note__: Logging the `LogSpout` Container is recommended to keep track of HTTP Request Error or Exceptions.
 
 #### Related to HTTP Client
-* __DIAL_KEEP_ALIVE__: The interval between keep-alive probes for an active network connection.
+* __DIAL_KEEP_ALIVE__: The interval (in `seconds`) between keep-alive probes for an active network connection.
   * __Default__: 60
   * __Source__: [net/dial.go#Timeout](https://github.com/golang/go/blob/master/src/net/dial.go#L72-L79)
 * __DIAL_TIMEOUT__: The maximum amount of time (in `seconds`) a dial will wait for a connect to complete.
@@ -69,21 +69,21 @@ __Note__: Logging `LogSpout` Container is recommended to keep track of the HTTP 
 * __HTTP_CLIENT_TIMEOUT__: Time limit (in `seconds`) for requests made by this HTTP Client, *Optional*
   * __Default__: 60
   * __Source__: [net/http/client.go#Timeout](https://github.com/golang/go/blob/master/src/net/http/client.go#L89-L104)
-* __TLS_HANDSHAKE_TIMEOUT__: The maximum amount of time (in `seconds`) waiting to wait for a TLS handshake, *Optional*
+* __TLS_HANDSHAKE_TIMEOUT__: The maximum amount of time (in `seconds`) allowed to wait for a TLS handshake, *Optional*
   * __Default__: 30
   * __Source__: [net/http/transport.go#TLSHandshakeTimeout](https://github.com/golang/go/blob/master/src/net/http/transport.go#L171-L173)
 
 #### Limits
-* __FLUSH_INTERVAL__: The frequency (in `milliseconds`) to ship the batch of logs, *Optional*
+* __FLUSH_INTERVAL__: How frequently batches of logs are sent (in `milliseconds`), *Optional*
   * __Default__: 250
 * __INACTIVITY_TIMEOUT__: The timeout to detect failure in `Docker API` and restart, *Optional*
   * __Default__: 1m
-  * __Note__: More information about the possible values can be found [here](https://github.com/gliderlabs/logspout#detecting-timeouts-in-docker-log-streams).
+  * __Note__: More information about the possible values can be found [here](https://github.com/gliderlabs/logspout#detecting-timeouts-in-docker-log-streams). Also see [`time.ParseDuration`](https://golang.org/pkg/time/#ParseDuration) for valid format as recommended [here](https://github.com/gliderlabs/logspout/blob/e671009d9df10e8139f6a4bea8adc9c7878ff4e9/router/pump.go#L112-L116).
 * __MAX_BUFFER_SIZE__: The maximum byte size (in `mb`) of the batch to ship to `LogDNA`, *Optional*
   * __Default__: 2
 * __MAX_LINE_LENGTH__: The maximum character length for each line, *Optional*
   * __Default__: 16000
-* __MAX_REQUEST_RETRY__: The maximum # of retries in case of network issue, *Optional*
+* __MAX_REQUEST_RETRY__: The maximum number of retries for sending a line when there are network failure, *Optional*
   * __Default__: 10
 
 ### Docker
