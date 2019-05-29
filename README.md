@@ -4,6 +4,31 @@
 
 A Docker LogSpout image to stream logs from your containers to LogDNA.
 
+## Change Log
+
+### v1.2.0
+
+* Added Tagged Build;
+* Added [semantic versioning](http://semver.org);
+* Added [`CHANGELOG.md`](https://github.com/logdna/logspout/blob/master/CHANGELOG.md);
+* Updated [`LICENSE`](https://github.com/logdna/logspout/blob/master/LICENSE);
+* Enriched the Adapter Configuration;
+* Added 12 New Environment Variable Options;
+* Implemented Retry Mechanism;
+* Added Message Sanitization;
+* Added Capturing `m.Container.State.Pid`;
+* Changed Buffer Limit from the Length to the Byte Size;
+* Polished Some Debug Statements.
+
+### v1.1.0
+
+* Getting Tags from Templates
+
+### v1.0.0
+
+* Initial Release
+
+
 ## How to Use
 
 ### Environment Variables
