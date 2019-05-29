@@ -28,18 +28,56 @@ A Docker LogSpout image to stream logs from your containers to LogDNA.
 
 * Initial Release
 
-
 ## How to Use
 
 ### Environment Variables
+
+The following variables can be used to tune the `logspout` for the specific use case.
+
+### Log Router Specific
+
+The following variables can be used for filtering the logs streaming into `LogSpout`. More information can be found [here](https://github.com/gliderlabs/logspout/tree/0da75a223db992cd5abc836796174588ddfc62b4/routesapi#routes-resource).
+
+* __FILTER_NAME__:
+  * __Description__: Filter by Container Name with Wildcards
+  * __Required__:    No
+
+* __FILTER_ID__:
+  * __Description__: Filter by Container ID with Wildcards
+  * __Required__:    No
+
+* __FILTER_SOURCES__:
+  * __Description__: Filter by Comma-Separated List of Sources
+  * __Required__:    No
+
+* __FILTER_LABELS__:
+  * __Description__: Filter by Comma-Separated List of Labels
+  * __Required__:    No
+
+### Ingestion Specific
+
+The following variables can be used for customizing the payloads `LogSpout` sends to `LogDNA`.
+
 * __LOGDNA_KEY__: LogDNA Ingestion Key, *Required*
-* __FILTER_NAME__: Filter by Container Name with Wildcards, *Optional*
-* __FILTER_ID__: Filter by Container ID with Wildcards, *Optional*
-* __FILTER_SOURCES__: Filter by Comma-separated List of Sources, *Optional*
-* __FILTER_LABELS__: Filter by Comma-separated List of Labels, *Optional*
 * __HOSTNAME__: Alternative Hostname, *Optional*
-* __TAGS__: Comma-separated List of Tags, *Optional*
-* __LOGDNA_URL__: Specific Endpoint to Stream Log into, *Optional*
+* __TAGS__: Comma-Separated List of Tags, *Optional*
+* __LOGDNA_URL__: Specific Endpoint to Stream Log into, *Optional*, *
+* __VERBOSE__: 
+
+### Related to HTTP Client
+* __DIAL_KEEP_ALIVE__:
+* __DIAL_TIMEOUT__:
+* __EXPECT_CONTINUE_TIMEOUT__:
+* __IDLE_CONN_TIMEOUT__:
+* __HTTP_CLIENT_TIMEOUT__:
+* __TLS_HANDSHAKE_TIMEOUT__:
+
+### Limits
+* __FLUSH_INTERVAL__:
+* __INACTIVITY_TIMEOUT__:
+* __MAX_BUFFER_SIZE__:
+* __MAX_LINE_LENGTH__:
+* __MAX_REQUEST_RETRY__:
 
 ### Docker
 
