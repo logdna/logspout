@@ -39,7 +39,6 @@ type LimitConfiguration struct {
 type HTTPClientConfiguration struct {
     DialContextTimeout      time.Duration
     DialContextKeepAlive    time.Duration
-    ExpectContinueTimeout   time.Duration
     IdleConnTimeout         time.Duration
     Timeout                 time.Duration
     TLSHandshakeTimeout     time.Duration
