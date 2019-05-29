@@ -28,6 +28,7 @@ import (
     "errors"
     "log"
     "os"
+    "strconv"
     "strings"
     "time"
 
@@ -75,36 +76,45 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
 
     config := adapter.Configuration{
         Custom:         adapter.CustomConfiguration{
-            Endpoint:   "logs.logdna.com/logs/ingest",
-            Hostname:   os.Getenv("HOSTNAME"),
-            Tags:       strings.Split(os.Getenv("TAGS"), ","),
+            Endpoint:   getStringOpt("LOGDNA_URL", "logs.logdna.com/logs/ingest"),
+            Hostname:   getStringOpt("HOSTNAME", ""),
+            Tags:       getStringOpt("TAGS", ""),
             Token:      token,
-            Verbose:    true,
+            Verbose:    os.Getenv("VERBOSE") != "0",
         }, HTTPClient:  adapter.HTTPClientConfiguration{
-            DialContextKeepAlive:   15 * time.Second,   // 30 by Default
-            DialContextTimeout:     15 * time.Second,   // 30 by Default
-            ExpectContinueTimeout:  5 * time.Second,    // 1 by Default
-            IdleConnTimeout:        60 * time.Second,   // 90 by Default
-            Timeout:                15 * time.Second,   // 30 by Default
-            TLSHandshakeTimeout:    5 * time.Second,   // 10 by Default
+            DialContextKeepAlive:   getUintOpt("DIAL_KEEP_ALIVE", 60) * time.Second,   // 30 by Default
+            DialContextTimeout:     getUintOpt("DIAL_TIMEOUT", 60) * time.Second,   // 30 by Default
+            ExpectContinueTimeout:  getUintOpt("EXPECT_CONTINUE_TIMEOUT", 5) * time.Second,    // 1 by Default
+            IdleConnTimeout:        getUintOpt("IDLE_CONN_TIMEOUT", 60) * time.Second,   // 90 by Default
+            Timeout:                getUintOpt("HTTP_CLIENT_TIMEOUT", 60) * time.Second,   // 30 by Default
+            TLSHandshakeTimeout:    getUintOpt("TLS_HANDSHAKE_TIMEOUT", 30) * time.Second,   // 10 by Default
         }, Limits:      adapter.LimitConfiguration{
-            FlushInterval:      2500 * time.Millisecond,
-            MaxBufferSize:      20 * 1024 * 1024,
-            MaxLineLength:      16000,
-            MaxRequestRetry:    10,
+            FlushInterval:      getUintOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
+            MaxBufferSize:      getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
+            MaxLineLength:      getUintOpt("MAX_LINE_LENGTH", 16000),
+            MaxRequestRetry:    getUintOpt("MAX_REQUEST_RETRY", 10),
         },
     }
 
-    endpoint := os.Getenv("LOGDNA_URL")
-    if endpoint != "" {
-        config.Custom.Endpoint = endpoint
+    if os.Getenv("INACTIVITY_TIMEOUT") == "" {
+        os.Setenv("INACTIVITY_TIMEOUT", "1m")
     }
-
-    if (os.Getenv("VERBOSE") == "0") {
-        config.Custom.Verbose = false
-    }
-
-    os.Setenv("INACTIVITY_TIMEOUT", "1m")
 
     return adapter.New(config), nil
+}
+
+// Getting Uint Variable from Environment:
+func getUintOpt(name string, dfault uint) uint {
+    if result, err := strconv.ParseUint(os.Getenv(name), 10, 64); err == nil {
+        return result
+    }
+    return dfault
+}
+
+// Getting String Variable from Environment:
+func getStringOpt(name, dfault string) string {
+    if value := os.Getenv(name); value != "" {
+        return value
+    }
+    return dfault
 }

@@ -66,10 +66,15 @@ func (adapter *Adapter) getHost(containerHostname string) string {
 // getTags method is for extracting the tags from templates:
 func (adapter *Adapter) getTags(m *router.Message) string {
     
+    if adapter.Config.Tags == "" {
+        return ""
+    }
+
+    splitTags := strings.Split(adapter.Config.Tags, ",")
     var listTags []string
     existenceMap := map[string]bool{}
 
-    for _, t := range adapter.Config.Tags {
+    for _, t := range splitTags {
         parsed := false
         if matched, error := regexp.Match(`{{.+}}`, []byte(t)); matched && error == nil {
             var parsedTagBytes bytes.Buffer            
@@ -188,13 +193,11 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
         Lines: buffer,
     }
 
-    err := json.NewEncoder(&data).Encode(body)
-
-    if err != nil {
+    if error := json.NewEncoder(&data).Encode(body); error != nil {
         adapter.Log.Println(
             fmt.Errorf(
                 "JSON Encoding Error: %s",
-                err.Error(),
+                error.Error(),
             ),
         )
         return
@@ -204,18 +207,12 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
     if resp != nil {
         adapter.Log.Print("Received Status Code: ", resp.StatusCode)
-        adapter.Log.Print("Received Response: ", resp.Body)
         defer resp.Body.Close()
     }
 
     if err != nil {
         if _, ok := err.(net.Error); ok {
-            for _, line := range buffer {
-                if line.Retried < adapter.Limits.MaxRequestRetry {
-                    line.Retried++
-                    adapter.Queue <- line
-                }
-            }
+            go adapter.retry(buffer)
         } else {
             adapter.Log.Println(
                 fmt.Errorf(
@@ -224,17 +221,25 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
                 ),
             )
         }
-        return
     }
 
     if resp.StatusCode != http.StatusOK {
         adapter.Log.Println(
             fmt.Errorf(
-                "Received Status Code: %s While Sending Message.\nResponse: %s",
+                "Received Status Code: %s While Sending Message",
                 resp.StatusCode,
-                resp.Body,
             ),
         )
+    }
+}
+
+// retry sending the buffer:
+func (adapter *Adapter) retry(buffer []Line) {
+    for _, line := range buffer {
+        if line.Retried < adapter.Limits.MaxRequestRetry {
+            line.Retried++
+            adapter.Queue <- line
+        }
     }
 }
 
