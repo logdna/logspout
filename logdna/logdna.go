@@ -104,7 +104,7 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
 }
 
 // Getting Uint Variable from Environment:
-func getIntOpt(name string, dfault uint) uint {
+func getIntOpt(name string, dfault int64) int64 {
     if result, err := strconv.ParseInt(os.Getenv(name), 10, 64); err == nil {
         return result
     }
