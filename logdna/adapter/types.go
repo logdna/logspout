@@ -22,7 +22,7 @@ type Configuration struct {
 type CustomConfiguration struct {
     Endpoint    string
     Hostname    string
-    Tags        []string
+    Tags        string
     Token       string
     Verbose     bool
 }
