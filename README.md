@@ -6,10 +6,10 @@ A Docker LogSpout image to stream logs from your containers to LogDNA.
 
 ## Change Log
 
-### v1.2.0
+### v1.2.0 - Released on May 29, 2019
 
 * Added Tagged Build;
-* Added [semantic versioning](http://semver.org);
+* Added [Semantic Versioning](http://semver.org);
 * Added [`CHANGELOG.md`](https://github.com/logdna/logspout/blob/master/CHANGELOG.md);
 * Updated [`LICENSE`](https://github.com/logdna/logspout/blob/master/LICENSE);
 * Enriched the Adapter Configuration;
