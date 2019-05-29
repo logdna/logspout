@@ -82,17 +82,17 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
             Token:      token,
             Verbose:    os.Getenv("VERBOSE") != "0",
         }, HTTPClient:  adapter.HTTPClientConfiguration{
-            DialContextKeepAlive:   getIntOpt("DIAL_KEEP_ALIVE", 60) * time.Second,   // 30 by Default
-            DialContextTimeout:     getIntOpt("DIAL_TIMEOUT", 60) * time.Second,   // 30 by Default
-            ExpectContinueTimeout:  getIntOpt("EXPECT_CONTINUE_TIMEOUT", 5) * time.Second,    // 1 by Default
-            IdleConnTimeout:        getIntOpt("IDLE_CONN_TIMEOUT", 60) * time.Second,   // 90 by Default
-            Timeout:                getIntOpt("HTTP_CLIENT_TIMEOUT", 60) * time.Second,   // 30 by Default
-            TLSHandshakeTimeout:    getIntOpt("TLS_HANDSHAKE_TIMEOUT", 30) * time.Second,   // 10 by Default
+            DialContextKeepAlive:   getDurationOpt("DIAL_KEEP_ALIVE", 60) * time.Second,   // 30 by Default
+            DialContextTimeout:     getDurationOpt("DIAL_TIMEOUT", 60) * time.Second,   // 30 by Default
+            ExpectContinueTimeout:  getDurationOpt("EXPECT_CONTINUE_TIMEOUT", 5) * time.Second,    // 1 by Default
+            IdleConnTimeout:        getDurationOpt("IDLE_CONN_TIMEOUT", 60) * time.Second,   // 90 by Default
+            Timeout:                getDurationOpt("HTTP_CLIENT_TIMEOUT", 60) * time.Second,   // 30 by Default
+            TLSHandshakeTimeout:    getDurationOpt("TLS_HANDSHAKE_TIMEOUT", 30) * time.Second,   // 10 by Default
         }, Limits:      adapter.LimitConfiguration{
-            FlushInterval:      getIntOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
-            MaxBufferSize:      getIntOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
-            MaxLineLength:      getIntOpt("MAX_LINE_LENGTH", 16000),
-            MaxRequestRetry:    getIntOpt("MAX_REQUEST_RETRY", 10),
+            FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
+            MaxBufferSize:      getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
+            MaxLineLength:      getUintOpt("MAX_LINE_LENGTH", 16000),
+            MaxRequestRetry:    getUintOpt("MAX_REQUEST_RETRY", 10),
         },
     }
 
@@ -104,9 +104,17 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
 }
 
 // Getting Uint Variable from Environment:
-func getIntOpt(name string, dfault int64) int64 {
-    if result, err := strconv.ParseInt(os.Getenv(name), 10, 64); err == nil {
+func getUintOpt(name string, dfault uint) uint {
+    if result, err := strconv.ParseUint(os.Getenv(name), 10, 64); err == nil {
         return result
+    }
+    return dfault
+}
+
+// Getting Duration Variable from Environment:
+func getDurationOpt(name string, dfault time.Duration) time.Duration {
+    if result, err := strconv.ParseInt(os.Getenv(name), 10, 64); err == nil {
+        return time.Duration(result)
     }
     return dfault
 }

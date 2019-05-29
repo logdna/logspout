@@ -203,7 +203,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
         return
     }
 
-    resp, err := http.Post(adapter.LogDNAURL, "application/json; charset=UTF-8", &data)
+    resp, err := adapter.HTTPClient.Post(adapter.LogDNAURL, "application/json; charset=UTF-8", &data)
 
     if resp != nil {
         adapter.Log.Print("Received Status Code: ", resp.StatusCode)
