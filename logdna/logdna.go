@@ -63,7 +63,7 @@ func init() {
     }
 
     if err := router.Routes.Add(r); err != nil {
-        log.Fatal("could not add route: ", err.Error())
+        log.Fatal("Cannot Add New Route: ", err.Error())
     }
 }
 

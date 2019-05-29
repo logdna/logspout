@@ -235,6 +235,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
 // retry sending the buffer:
 func (adapter *Adapter) retry(buffer []Line) {
+    adapter.Log.Print("Retrying...")
     for _, line := range buffer {
         if line.Retried < adapter.Limits.MaxRequestRetry {
             line.Retried++
