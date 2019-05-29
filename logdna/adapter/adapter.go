@@ -212,7 +212,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
     if err != nil {
         if _, ok := err.(net.Error); ok {
-            go adapter.retry(buffer)
+            adapter.retry(buffer)
         } else {
             adapter.Log.Println(
                 fmt.Errorf(
