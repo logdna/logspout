@@ -79,11 +79,11 @@ __Note__: Logging the `LogSpout` Container is recommended to keep track of HTTP 
 * __INACTIVITY_TIMEOUT__: How long to wait for inactivity before declaring failure in the `Docker API` and restarting, *Optional*
   * __Default__: 1m
   * __Note__: More information about the possible values can be found [here](https://github.com/gliderlabs/logspout#detecting-timeouts-in-docker-log-streams). Also see [`time.ParseDuration`](https://golang.org/pkg/time/#ParseDuration) for valid format as recommended [here](https://github.com/gliderlabs/logspout/blob/e671009d9df10e8139f6a4bea8adc9c7878ff4e9/router/pump.go#L112-L116).
-* __MAX_BUFFER_SIZE__: The maximum size (in `mb`) of the batch to ship to `LogDNA`, *Optional*
+* __MAX_BUFFER_SIZE__: The maximum size (in `mb`) of batches to ship to `LogDNA`, *Optional*
   * __Default__: 2
 * __MAX_LINE_LENGTH__: The maximum character length for each line, *Optional*
   * __Default__: 16000
-* __MAX_REQUEST_RETRY__: The maximum number of retries for sending a line when there are network failure, *Optional*
+* __MAX_REQUEST_RETRY__: The maximum number of retries for sending a line when there are network failures, *Optional*
   * __Default__: 10
 
 ### Docker
