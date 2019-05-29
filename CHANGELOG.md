@@ -2,7 +2,7 @@
 
 This file documents all notable changes in `LogDNA LogSpout Image`. The release numbering uses [semantic versioning](http://semver.org).
 
-## v1.2.0
+## v1.2.0 - Released on May 29, 2019
 
 * Added Tagged Build;
 * Added [semantic versioning](http://semver.org);

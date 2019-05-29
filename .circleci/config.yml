@@ -9,7 +9,7 @@ jobs:
           name: Check Tagged Push
           command: |
             TAG_VERSION=$(git tag -l --sort=-v:refname | head -n 1 | cut -d'-' -f2)
-            CLOG_VERSION=$(cat CHANGELOG.md | grep "## v" | head -n 1 | cut -d'v' -f2)
+            CLOG_VERSION=$(cat CHANGELOG.md | grep "## v" | head -n 1 | cut -d'v' -f2 | cut -d' ' -f1)
             if [[ "${TAG_VERSION}" != "${CLOG_VERSION}" ]]; then
               echo "There is mismatch:"
               echo "  TAG_VERSION: ${TAG_VERSION}"
