@@ -208,7 +208,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
             log.Println(
                 fmt.Errorf(
                     "HTTP Client Post Request Error: %s",
-                    err.Error()
+                    err.Error(),
                 ),
             )
         }
