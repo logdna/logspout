@@ -36,7 +36,6 @@ type Line struct {
     Timestamp   int64  `json:"timestamp"`
     Line        string `json:"line"`
     File        string `json:"file"`
-    Retried     uint64 `json:"-"`
 }
 
 // Message structure:

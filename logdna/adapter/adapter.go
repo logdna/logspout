@@ -74,7 +74,6 @@ func (adapter *Adapter) getTags(m *router.Message) string {
     splitTags := strings.Split(adapter.Config.Tags, ",")
     var listTags []string
     existenceMap := map[string]bool{}
-
     for _, t := range splitTags {
         parsed := false
         if matched, error := regexp.Match(`{{.+}}`, []byte(t)); matched && error == nil {
@@ -131,14 +130,11 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
                 ),
             )
         } else {
-            
             adapter.Queue <- Line{
                 Line:       string(messageStr),
                 File:       m.Container.Name,
                 Timestamp:  time.Now().Unix(),
-                Retried:    0,
             }
-        
         }
     }
 }
