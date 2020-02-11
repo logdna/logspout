@@ -5,6 +5,7 @@ import (
     "log"
     "net/http"
     "time"
+    "sync"
 )
 
 /*
@@ -24,7 +25,6 @@ type CustomConfiguration struct {
     Hostname    string
     Tags        string
     Token       string
-    Verbose     bool
 }
 
 // LimitConfiguration is SubConfiguration for Limits:
@@ -52,6 +52,7 @@ type Adapter struct {
     LogDNAURL   string
     Queue       chan Line
     HTTPClient  *http.Client
+    sync.Mutex
 }
 
 // Line structure for the queue of Adapter:

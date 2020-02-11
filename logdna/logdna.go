@@ -75,7 +75,6 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
             Hostname:   getStringOpt("HOSTNAME", ""),
             Tags:       getStringOpt("TAGS", ""),
             Token:      token,
-            Verbose:    os.Getenv("VERBOSE") != "0",
         }, HTTPClient:  adapter.HTTPClientConfiguration{
             DialContextKeepAlive:   getDurationOpt("DIAL_KEEP_ALIVE", 60) * time.Second,        // 30 by Default
             DialContextTimeout:     getDurationOpt("DIAL_TIMEOUT", 60) * time.Second,           // 30 by Default

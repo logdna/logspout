@@ -113,39 +113,39 @@ func (adapter *Adapter) sanitizeMessage(message string) string {
 // Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
-        if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
-            messageStr, err := json.Marshal(Message{
-                Message:    adapter.sanitizeMessage(m.Data),
-                Container:  ContainerInfo{
-                    Name:   m.Container.Name,
-                    ID:     m.Container.ID,
-                    PID:    m.Container.State.Pid,
-                    Config: ContainerConfig{
-                        Image:      m.Container.Config.Image,
-                        Hostname:   m.Container.Config.Hostname,
-                        Labels:     m.Container.Config.Labels,
-                    },
+        messageStr, err := json.Marshal(Message{
+            Message:    adapter.sanitizeMessage(m.Data),
+            Container:  ContainerInfo{
+                Name:   m.Container.Name,
+                ID:     m.Container.ID,
+                PID:    m.Container.State.Pid,
+                Config: ContainerConfig{
+                    Image:      m.Container.Config.Image,
+                    Hostname:   m.Container.Config.Hostname,
+                    Labels:     m.Container.Config.Labels,
                 },
-                Level:      adapter.getLevel(m.Source),
-                Hostname:   adapter.getHost(m.Container.Config.Hostname),
-                Tags:       adapter.getTags(m),
-            })
+            },
+            Level:      adapter.getLevel(m.Source),
+            Hostname:   adapter.getHost(m.Container.Config.Hostname),
+            Tags:       adapter.getTags(m),
+        })
 
-            if err != nil {
-                adapter.Log.Println(
-                    fmt.Errorf(
-                        "JSON Marshalling Error: %s",
-                        err.Error(),
-                    ),
-                )
-            } else {
-                adapter.Queue <- Line{
-                    Line:       string(messageStr),
-                    File:       m.Container.Name,
-                    Timestamp:  time.Now().Unix(),
-                    Retried:    0,
-                }
+        if err != nil {
+            adapter.Log.Println(
+                fmt.Errorf(
+                    "JSON Marshalling Error: %s",
+                    err.Error(),
+                ),
+            )
+        } else {
+            c.Lock()
+            adapter.Queue <- Line{
+                Line:       string(messageStr),
+                File:       m.Container.Name,
+                Timestamp:  time.Now().Unix(),
+                Retried:    0,
             }
+            c.Unlock()
         }
     }
 }
@@ -186,11 +186,13 @@ func (adapter *Adapter) readQueue() {
 func (adapter *Adapter) flushBuffer(buffer []Line) {
     var data bytes.Buffer
 
+    c.Lock()
     body := struct {
         Lines []Line `json:"lines"`
     }{
         Lines: buffer,
     }
+    c.Unlock()
 
     if error := json.NewEncoder(&data).Encode(body); error != nil {
         adapter.Log.Println(
@@ -235,8 +237,10 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 func (adapter *Adapter) retry(buffer []Line) {
     for _, line := range buffer {
         if line.Retried < adapter.Limits.MaxRequestRetry {
+            c.Lock()
             line.Retried++
             adapter.Queue <- line
+            c.Unlock()
         }
     }
 }
