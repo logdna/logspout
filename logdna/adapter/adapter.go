@@ -9,7 +9,6 @@ import (
     "net"
     "net/http"
     "net/url"
-    "os"
     "regexp"
     "strings"
     "text/template"
@@ -109,7 +108,7 @@ func (adapter *Adapter) getTags(m *router.Message) string {
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
         messageStr, err := json.Marshal(Message{
-            Message:    adapter.sanitizeMessage(m.Data),
+            Message:    m.Data,
             Container:  ContainerInfo{
                 Name:   m.Container.Name,
                 ID:     m.Container.ID,
@@ -132,14 +131,14 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
                 ),
             )
         } else {
-            c.Lock()
+            adapter.Lock()
             adapter.Queue <- Line{
                 Line:       string(messageStr),
                 File:       m.Container.Name,
                 Timestamp:  time.Now().Unix(),
                 Retried:    0,
             }
-            c.Unlock()
+            adapter.Unlock()
         }
     }
 }
@@ -180,13 +179,13 @@ func (adapter *Adapter) readQueue() {
 func (adapter *Adapter) flushBuffer(buffer []Line) {
     var data bytes.Buffer
 
-    c.Lock()
+    adapter.Lock()
     body := struct {
         Lines []Line `json:"lines"`
     }{
         Lines: buffer,
     }
-    c.Unlock()
+    adapter.Unlock()
 
     if error := json.NewEncoder(&data).Encode(body); error != nil {
         log.Println(
