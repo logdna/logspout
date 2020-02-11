@@ -199,7 +199,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
     req, _ := http.NewRequest(http.MethodPost, buildLogDNAURL(adapter.Config.LogDNAURL, adapter.Config.LogDNAKey), &data)
     req.Header.Set("User-Agent", "logspout/1.2.0")
-    req.Header.Set("Content-Type": "application/json; charset=UTF-8")
+    req.Header.Set("Content-Type", "application/json; charset=UTF-8")
     req.SetBasicAuth(adapter.Config.LogDNAKey, "")
     resp, err := HTTPClient.Do(req)
 
