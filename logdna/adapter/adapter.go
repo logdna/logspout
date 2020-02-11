@@ -201,11 +201,16 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     req.Header.Set("User-Agent", "logspout/1.2.0")
     req.Header.Set("Content-Type", "application/json; charset=UTF-8")
     req.SetBasicAuth(adapter.Config.LogDNAKey, "")
-    resp, err := HTTPClient.Do(req)
+    resp, err := adapter.HTTPClient.Do(req)
 
     if err != nil {
         if ok, _ := err.(net.Error); ok {
-            log.Error("HTTP Client Post Request Error: ", err.Error())
+            log.Println(
+                fmt.Errorf(
+                    "HTTP Client Post Request Error: %s",
+                    err.Error()
+                ),
+            )
         }
         return
     }
