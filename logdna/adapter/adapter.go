@@ -21,17 +21,12 @@ import (
 
 // New method of Adapter:
 func New(config Configuration) *Adapter {
-    backoffInterval := getDurationOpt("HTTP_CLIENT_BACKOFF", 2) * time.Millisecond
-    maximumJitterInterval := getDurationOpt("HTTP_CLIENT_JITTER", 5) * time.Millisecond
-    httpTimeout := getDurationOpt("HTTP_CLIENT_TIMEOUT", 30) * time.Second
-    retryCount := getUintOpt("MAX_REQUEST_RETRY", 5)
-
-    backoff := heimdall.NewConstantBackoff(backoffInterval, maximumJitterInterval)
+    backoff := heimdall.NewConstantBackoff(config.BackoffInterval, config.JitterInterval)
     retrier := heimdall.NewRetrier(backoff)
     httpClient := httpclient.NewClient(
-        httpclient.WithHTTPTimeout(httpTimeout),
+        httpclient.WithHTTPTimeout(config.HTTPTimeout),
         httpclient.WithRetrier(retrier),
-        httpclient.WithRetryCount(int(retryCount)),
+        httpclient.WithRetryCount(int(config.RequestRetryCount)),
     )
 
     adapter := &Adapter{

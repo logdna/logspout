@@ -15,12 +15,16 @@ import (
 
 // Configuration is Configuration Struct for LogDNA Adapter:
 type Configuration struct {
-    FlushInterval   time.Duration
-    Hostname        string
-    LogDNAKey       string
-    LogDNAURL       string
-    MaxBufferSize   uint64
-    Tags            string
+    BackoffInterval     time.Duration
+    FlushInterval       time.Duration
+    Hostname            string
+    HTTPTimeout         time.Duration
+    JitterInterval      time.Duration
+    LogDNAKey           string
+    LogDNAURL           string
+    MaxBufferSize       uint64
+    RequestRetryCount   uint64
+    Tags                string
 }
 
 // Adapter structure:
@@ -58,32 +62,4 @@ type ContainerConfig struct {
     Image       string              `json:"image"`
     Hostname    string              `json:"hostname"`
     Labels      map[string]string   `json:"labels"`
-}
-
-/*
-    Common Functions
-*/
-
-// Getting Uint Variable from Environment:
-func getUintOpt(name string, dfault uint64) uint64 {
-    if result, err := strconv.ParseUint(os.Getenv(name), 10, 64); err == nil {
-        return result
-    }
-    return dfault
-}
-
-// Getting Duration Variable from Environment:
-func getDurationOpt(name string, dfault time.Duration) time.Duration {
-    if result, err := strconv.ParseInt(os.Getenv(name), 10, 64); err == nil {
-        return time.Duration(result)
-    }
-    return dfault
-}
-
-// Getting String Variable from Environment:
-func getStringOpt(name, dfault string) string {
-    if value := os.Getenv(name); value != "" {
-        return value
-    }
-    return dfault
 }

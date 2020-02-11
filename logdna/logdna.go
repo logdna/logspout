@@ -108,12 +108,16 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
     }
 
     config := adapter.Configuration{
-        FlushInterval:  getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
-        Hostname:       hostname,
-        LogDNAKey:      logdnaKey,
-        LogDNAURL:      getStringOpt("LOGDNA_URL", "logs.logdna.com/logs/ingest"),
-        MaxBufferSize:  getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
-        Tags:           os.Getenv("TAGS"),
+        BackoffInterval:    getDurationOpt("HTTP_CLIENT_BACKOFF", 2) * time.Millisecond,
+        FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
+        Hostname:           hostname,
+        HTTPTimeout:        getDurationOpt("HTTP_CLIENT_TIMEOUT", 30) * time.Second,
+        JitterInterval:     getDurationOpt("HTTP_CLIENT_JITTER", 5) * time.Millisecond,
+        LogDNAKey:          logdnaKey,
+        LogDNAURL:          getStringOpt("LOGDNA_URL", "logs.logdna.com/logs/ingest"),
+        MaxBufferSize:      getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
+        RequestRetryCount:  getUintOpt("MAX_REQUEST_RETRY", 5),
+        Tags:               os.Getenv("TAGS"),
     }
 
     return adapter.New(config), nil
