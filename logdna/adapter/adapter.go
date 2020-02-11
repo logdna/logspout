@@ -16,28 +16,31 @@ import (
     "time"
 
     "github.com/gliderlabs/logspout/router"
+    "github.com/gojektech/heimdall"
+    "github.com/gojektech/heimdall/httpclient"
 )
 
 // New method of Adapter:
 func New(config Configuration) *Adapter {
+    backoffInterval := getDurationOpt("HTTP_CLIENT_BACKOFF", 2) * time.Millisecond
+    maximumJitterInterval := getDurationOpt("HTTP_CLIENT_JITTER", 5) * time.Millisecond
+    httpTimeout := getDurationOpt("HTTP_CLIENT_TIMEOUT", 30) * time.Second
+    retryCount := getUintOpt("MAX_REQUEST_RETRY", 5)
+
+    backoff := heimdall.NewConstantBackoff(backoffInterval, maximumJitterInterval)
+    retrier := heimdall.NewRetrier(backoff)
+    httpClient := httpclient.NewClient(
+        httpclient.WithHTTPTimeout(timeout),
+        httpclient.WithRetrier(retrier),
+        httpclient.WithRetryCount(retryCount),
+    )
+
     adapter := &Adapter{
-        Config:     config.Custom,
-        Limits:     config.Limits,
-        Log:        log.New(os.Stdout, config.Custom.Hostname + " ", log.LstdFlags),
-        LogDNAURL:  buildLogDNAURL(config.Custom.Endpoint, config.Custom.Token),
+        Config:     config,
         Queue:      make(chan Line),
-        HTTPClient: &http.Client{
-            Timeout:    config.HTTPClient.Timeout,
-            Transport:  &http.Transport{
-                IdleConnTimeout:        config.HTTPClient.IdleConnTimeout,
-                TLSHandshakeTimeout:    config.HTTPClient.TLSHandshakeTimeout,
-                DialContext: (&net.Dialer{
-                    KeepAlive: config.HTTPClient.DialContextKeepAlive,
-                    Timeout:   config.HTTPClient.DialContextTimeout,
-                }).DialContext,
-            },
-        },
+        HTTPClient: httpClient,
     }
+
     go adapter.readQueue()
     return adapter
 }
@@ -102,14 +105,6 @@ func (adapter *Adapter) getTags(m *router.Message) string {
     return strings.Join(listTags, ",")
 }
 
-// sanitizeMessage is a method for sanitizing the log message:
-func (adapter *Adapter) sanitizeMessage(message string) string {
-    if uint64(len(message)) > adapter.Limits.MaxLineLength {
-        return message[0:adapter.Limits.MaxLineLength] + " (cut off, too long...)"
-    }
-    return message
-}
-
 // Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
@@ -118,7 +113,6 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             Container:  ContainerInfo{
                 Name:   m.Container.Name,
                 ID:     m.Container.ID,
-                PID:    m.Container.State.Pid,
                 Config: ContainerConfig{
                     Image:      m.Container.Config.Image,
                     Hostname:   m.Container.Config.Hostname,
@@ -131,7 +125,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
         })
 
         if err != nil {
-            adapter.Log.Println(
+            log.Println(
                 fmt.Errorf(
                     "JSON Marshalling Error: %s",
                     err.Error(),
@@ -154,16 +148,16 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 func (adapter *Adapter) readQueue() {
 
     buffer := make([]Line, 0)
-    timeout := time.NewTimer(adapter.Limits.FlushInterval)
+    timeout := time.NewTimer(adapter.Config.FlushInterval)
     byteSize := 0
 
     for {
         select {
         case msg := <-adapter.Queue:
-            if uint64(byteSize) >= adapter.Limits.MaxBufferSize {
+            if uint64(byteSize) >= adapter.Config.MaxBufferSize {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
-                timeout.Reset(adapter.Limits.FlushInterval)
+                timeout.Reset(adapter.Config.FlushInterval)
                 buffer = make([]Line, 0)
                 byteSize = 0
             }
@@ -174,7 +168,7 @@ func (adapter *Adapter) readQueue() {
         case <-timeout.C:
             if len(buffer) > 0 {
                 adapter.flushBuffer(buffer)
-                timeout.Reset(adapter.Limits.FlushInterval)
+                timeout.Reset(adapter.Config.FlushInterval)
                 buffer = make([]Line, 0)
                 byteSize = 0
             }
@@ -195,7 +189,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     c.Unlock()
 
     if error := json.NewEncoder(&data).Encode(body); error != nil {
-        adapter.Log.Println(
+        log.Println(
             fmt.Errorf(
                 "JSON Encoding Error: %s",
                 error.Error(),
@@ -204,25 +198,19 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
         return
     }
 
-    resp, err := adapter.HTTPClient.Post(adapter.LogDNAURL, "application/json; charset=UTF-8", &data)
+    resp, err := adapter.HTTPClient.Post(
+        buildLogDNAURL(adapter.Config.LogDNAURL, adapter.Config.LogDNAKey), "application/json; charset=UTF-8", &data)
 
     if err != nil {
-        if _, ok := err.(net.Error); ok {
-            go adapter.retry(buffer)
-        } else {
-            adapter.Log.Println(
-                fmt.Errorf(
-                    "HTTP Client Post Request Error: %s",
-                    err.Error(),
-                ),
-            )
+        if ok, _ := err.(net.Error); ok {
+            log.Error("HTTP Client Post Request Error: ", err.Error())
         }
         return
     }
 
     if resp != nil {
         if resp.StatusCode != http.StatusOK {
-            adapter.Log.Println(
+            log.Println(
                 fmt.Errorf(
                     "Received Status Code: %s While Sending Message",
                     resp.StatusCode,
@@ -230,18 +218,6 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
             )
         }
         defer resp.Body.Close()
-    }
-}
-
-// retry sending the buffer:
-func (adapter *Adapter) retry(buffer []Line) {
-    for _, line := range buffer {
-        if line.Retried < adapter.Limits.MaxRequestRetry {
-            c.Lock()
-            line.Retried++
-            adapter.Queue <- line
-            c.Unlock()
-        }
     }
 }
 

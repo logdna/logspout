@@ -6,6 +6,8 @@ import (
     "net/http"
     "time"
     "sync"
+
+    "github.com/gojektech/heimdall"
 )
 
 /*
@@ -14,44 +16,19 @@ import (
 
 // Configuration is Configuration Struct for LogDNA Adapter:
 type Configuration struct {
-    Custom      CustomConfiguration
-    HTTPClient  HTTPClientConfiguration
-    Limits      LimitConfiguration
-}
-
-// CustomConfiguration is Custom SubConfiguration:
-type CustomConfiguration struct {
-    Endpoint    string
-    Hostname    string
-    Tags        string
-    Token       string
-}
-
-// LimitConfiguration is SubConfiguration for Limits:
-type LimitConfiguration struct {
     FlushInterval   time.Duration
+    Hostname        string
+    LogDNAKey       string
+    LogDNAURL       string
     MaxBufferSize   uint64
-    MaxLineLength   uint64
-    MaxRequestRetry uint64
-}
-
-// HTTPClientConfiguration is for Configuring HTTP Client:
-type HTTPClientConfiguration struct {
-    DialContextTimeout      time.Duration
-    DialContextKeepAlive    time.Duration
-    IdleConnTimeout         time.Duration
-    Timeout                 time.Duration
-    TLSHandshakeTimeout     time.Duration
+    Tags            string
 }
 
 // Adapter structure:
 type Adapter struct {
-    Config      CustomConfiguration
-    Limits      LimitConfiguration
-    Log         *log.Logger
-    LogDNAURL   string
+    Config      Configuration
     Queue       chan Line
-    HTTPClient  *http.Client
+    HTTPClient  heimdall.Client
     sync.Mutex
 }
 
@@ -76,7 +53,6 @@ type Message struct {
 type ContainerInfo struct {
     Name    string          `json:"name"`
     ID      string          `json:"id"`
-    PID     int             `json:"pid",omitempty`
     Config  ContainerConfig `json:"config"`
 }
 

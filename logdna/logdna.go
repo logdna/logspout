@@ -64,33 +64,27 @@ func init() {
 
 // NewLogDNAAdapter creates adapter:
 func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
-    token := os.Getenv("LOGDNA_KEY")
-    if token == "" {
+    logdnaKey := os.Getenv("LOGDNA_KEY")
+    if logdnaKey == "" {
         return nil, errors.New("Cannot Find Environment Variable \"LOGDNA_KEY\"")
     }
 
-    config := adapter.Configuration{
-        Custom:         adapter.CustomConfiguration{
-            Endpoint:   getStringOpt("LOGDNA_URL", "logs.logdna.com/logs/ingest"),
-            Hostname:   getStringOpt("HOSTNAME", ""),
-            Tags:       getStringOpt("TAGS", ""),
-            Token:      token,
-        }, HTTPClient:  adapter.HTTPClientConfiguration{
-            DialContextKeepAlive:   getDurationOpt("DIAL_KEEP_ALIVE", 60) * time.Second,        // 30 by Default
-            DialContextTimeout:     getDurationOpt("DIAL_TIMEOUT", 60) * time.Second,           // 30 by Default
-            IdleConnTimeout:        getDurationOpt("IDLE_CONN_TIMEOUT", 60) * time.Second,      // 90 by Default
-            Timeout:                getDurationOpt("HTTP_CLIENT_TIMEOUT", 60) * time.Second,    // 30 by Default
-            TLSHandshakeTimeout:    getDurationOpt("TLS_HANDSHAKE_TIMEOUT", 30) * time.Second,   // 10 by Default
-        }, Limits:      adapter.LimitConfiguration{
-            FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
-            MaxBufferSize:      getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
-            MaxLineLength:      getUintOpt("MAX_LINE_LENGTH", 16000),
-            MaxRequestRetry:    getUintOpt("MAX_REQUEST_RETRY", 10),
-        },
+    hostname := os.Getenv("HOSTNAME")
+    if hostname == "" {
+        hostname, _ := os.Hostname()
     }
 
     if os.Getenv("INACTIVITY_TIMEOUT") == "" {
         os.Setenv("INACTIVITY_TIMEOUT", "1m")
+    }
+
+    config := adapter.Configuration{
+        FlushInterval:  getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
+        Hostname:       hostname,
+        LogDNAKey:      logdnaKey,
+        LogDNAURL:      getStringOpt("LOGDNA_URL", "logs.logdna.com/logs/ingest"),
+        MaxBufferSize:  getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
+        Tags:           os.Getenv("TAGS"),
     }
 
     return adapter.New(config), nil
