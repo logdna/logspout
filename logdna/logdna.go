@@ -99,7 +99,8 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
 
     hostname := os.Getenv("HOSTNAME")
     if hostname == "" {
-        hostname, _ := os.Hostname()
+        host, _ := os.Hostname()
+        hostname = host
     }
 
     if os.Getenv("INACTIVITY_TIMEOUT") == "" {
