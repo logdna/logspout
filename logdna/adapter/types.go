@@ -3,9 +3,6 @@ package adapter
 
 import (
     "time"
-    "os"
-    "strconv"
-
     "github.com/gojektech/heimdall"
 )
 
