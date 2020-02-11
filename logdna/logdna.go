@@ -28,13 +28,40 @@ import (
     "errors"
     "log"
     "os"
-    "strconv"
     "strings"
     "time"
 
     "github.com/gliderlabs/logspout/router"
     "github.com/smusali/logspout/logdna/adapter"
 )
+
+/*
+    Common Functions
+*/
+
+// Getting Uint Variable from Environment:
+func getUintOpt(name string, dfault uint64) uint64 {
+    if result, err := strconv.ParseUint(os.Getenv(name), 10, 64); err == nil {
+        return result
+    }
+    return dfault
+}
+
+// Getting Duration Variable from Environment:
+func getDurationOpt(name string, dfault time.Duration) time.Duration {
+    if result, err := strconv.ParseInt(os.Getenv(name), 10, 64); err == nil {
+        return time.Duration(result)
+    }
+    return dfault
+}
+
+// Getting String Variable from Environment:
+func getStringOpt(name, dfault string) string {
+    if value := os.Getenv(name); value != "" {
+        return value
+    }
+    return dfault
+}
 
 func init() {
     router.AdapterFactories.Register(NewLogDNAAdapter, "logdna")
