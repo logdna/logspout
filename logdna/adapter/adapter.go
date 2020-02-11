@@ -204,14 +204,12 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     resp, err := adapter.HTTPClient.Do(req)
 
     if err != nil {
-        if ok, _ := err.(net.Error); ok {
-            log.Println(
-                fmt.Errorf(
-                    "HTTP Client Post Request Error: %s",
-                    err.Error(),
-                ),
-            )
-        }
+        log.Println(
+            fmt.Errorf(
+                "HTTP Client Post Request Error: %s",
+                err.Error(),
+            ),
+        )
         return
     }
 
