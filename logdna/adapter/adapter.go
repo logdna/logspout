@@ -6,7 +6,6 @@ import (
     "encoding/json"
     "fmt"
     "log"
-    "net"
     "net/http"
     "net/url"
     "regexp"
