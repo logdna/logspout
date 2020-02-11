@@ -142,28 +142,24 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 // readQueue is a method for reading from queue:
 func (adapter *Adapter) readQueue() {
 
-    buffer := make([]Line, 0)
+    buffer := make([]Line, 0, adapter.Config.MaxBufferSize)
     timeout := time.NewTimer(adapter.Config.FlushInterval)
-    byteSize := 0
 
     for {
         select {
         case msg := <-adapter.Queue:
-            if uint64(byteSize) >= adapter.Config.MaxBufferSize {
+            if len(buffer) >= cap(buffer) {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0)
-                byteSize = 0
+                buffer = make([]Line, 0, adapter.Config.MaxBufferSize)
             }
 
             buffer = append(buffer, msg)
-            byteSize += len(msg.Line)
 
         case <-timeout.C:
             if len(buffer) > 0 {
                 adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0)
-                byteSize = 0
+                buffer = make([]Line, 0, adapter.Config.MaxBufferSize)
             }
         }
 
