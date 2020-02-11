@@ -101,6 +101,10 @@ func (adapter *Adapter) getTags(m *router.Message) string {
 // Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
+        if m.Data == "" {
+            continue
+        }
+
         messageStr, err := json.Marshal(Message{
             Message:    m.Data,
             Container:  ContainerInfo{
