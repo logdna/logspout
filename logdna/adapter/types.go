@@ -29,7 +29,6 @@ type Adapter struct {
     Config      Configuration
     Queue       chan Line
     HTTPClient  heimdall.Client
-    sync.Mutex
 }
 
 // Line structure for the queue of Adapter:

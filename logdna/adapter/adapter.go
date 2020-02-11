@@ -8,6 +8,7 @@ import (
     "log"
     "net/http"
     "net/url"
+    "os"
     "regexp"
     "strings"
     "text/template"
@@ -130,14 +131,14 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
                 ),
             )
         } else {
-            adapter.Lock()
+            
             adapter.Queue <- Line{
                 Line:       string(messageStr),
                 File:       m.Container.Name,
                 Timestamp:  time.Now().Unix(),
                 Retried:    0,
             }
-            adapter.Unlock()
+        
         }
     }
 }
@@ -178,13 +179,13 @@ func (adapter *Adapter) readQueue() {
 func (adapter *Adapter) flushBuffer(buffer []Line) {
     var data bytes.Buffer
 
-    adapter.Lock()
+    
     body := struct {
         Lines []Line `json:"lines"`
     }{
         Lines: buffer,
     }
-    adapter.Unlock()
+
 
     if error := json.NewEncoder(&data).Encode(body); error != nil {
         log.Println(
@@ -197,7 +198,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     }
 
     req, _ := http.NewRequest(http.MethodPost, buildLogDNAURL(adapter.Config.LogDNAURL, adapter.Config.LogDNAKey), &data)
-    req.Header.Set("User-Agent", "logspout/1.2.0")
+    req.Header.Set("User-Agent", "logspout/" + os.Getenv("BUILD_VERSION"))
     req.Header.Set("Content-Type", "application/json; charset=UTF-8")
     req.SetBasicAuth(adapter.Config.LogDNAKey, "")
     resp, err := adapter.HTTPClient.Do(req)

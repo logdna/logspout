@@ -1,2 +1,2 @@
 FROM gliderlabs/logspout:master
-ARG BUILD_VERSION=1.2.0
+ENV BUILD_VERSION 1.2.0
