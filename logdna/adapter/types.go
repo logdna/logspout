@@ -5,7 +5,6 @@ import (
     "time"
     "os"
     "strconv"
-    "sync"
 
     "github.com/gojektech/heimdall"
 )
