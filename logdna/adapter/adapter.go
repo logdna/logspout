@@ -3,6 +3,7 @@ package adapter
 
 import (
     "bytes"
+    "encoding/binary"
     "encoding/json"
     "fmt"
     "log"
@@ -13,7 +14,6 @@ import (
     "strings"
     "text/template"
     "time"
-
     "github.com/gliderlabs/logspout/router"
     "github.com/gojektech/heimdall"
     "github.com/gojektech/heimdall/httpclient"
@@ -141,16 +141,16 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 // readQueue is a method for reading from queue:
 func (adapter *Adapter) readQueue() {
 
-    buffer := make([]Line, 0, adapter.Config.MaxBufferSize)
+    buffer := make([]Line, 0)
     timeout := time.NewTimer(adapter.Config.FlushInterval)
 
     for {
         select {
         case msg := <-adapter.Queue:
-            if len(buffer) >= cap(buffer) {
+            if binary.Size(buffer) >= adapter.Config.MaxBufferSize {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0, adapter.Config.MaxBufferSize)
+                buffer = make([]Line, 0)
             }
 
             buffer = append(buffer, msg)
@@ -158,7 +158,7 @@ func (adapter *Adapter) readQueue() {
         case <-timeout.C:
             if len(buffer) > 0 {
                 adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0, adapter.Config.MaxBufferSize)
+                buffer = make([]Line, 0)
             }
         }
 
