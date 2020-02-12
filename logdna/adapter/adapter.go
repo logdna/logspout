@@ -147,7 +147,7 @@ func (adapter *Adapter) readQueue() {
     for {
         select {
         case msg := <-adapter.Queue:
-            if binary.Size(buffer) >= adapter.Config.MaxBufferSize {
+            if binary.Size(buffer) >= int(adapter.Config.MaxBufferSize) {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
                 buffer = make([]Line, 0)
