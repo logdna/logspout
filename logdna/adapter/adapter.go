@@ -142,23 +142,27 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 func (adapter *Adapter) readQueue() {
 
     buffer := make([]Line, 0)
+    bufferSize := 0
     timeout := time.NewTimer(adapter.Config.FlushInterval)
 
     for {
         select {
         case msg := <-adapter.Queue:
-            if binary.Size(buffer) >= int(adapter.Config.MaxBufferSize) {
+            if bufferSize >= int(adapter.Config.MaxBufferSize) {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
                 buffer = make([]Line, 0)
+                bufferSize = 0
             }
 
             buffer = append(buffer, msg)
+            bufferSize += binary.Size(msg)
 
         case <-timeout.C:
-            if len(buffer) > 0 {
+            if bufferSize > 0 {
                 adapter.flushBuffer(buffer)
                 buffer = make([]Line, 0)
+                bufferSize = 0
             }
         }
 
