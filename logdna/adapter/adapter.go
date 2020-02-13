@@ -153,7 +153,7 @@ func (adapter *Adapter) readQueue() {
             }
             adapter.Buffer = append(adapter.Buffer, msg)
             adapter.BufferSize += binary.Size(msg)
-        case <-timeout.C:
+        case <-adapter.FlushTimeout.C:
             if adapter.BufferSize > 0 {
                 adapter.flushBuffer(adapter.Buffer)
                 adapter.Buffer = make([]Line, 0)
