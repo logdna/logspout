@@ -33,7 +33,7 @@ func New(config Configuration) *Adapter {
         Buffer:         make([]Line, 0),
         BufferSize:     0,
         Config:         config,
-        FlushTimeout:   time.NewTimer(config.FlushInterval)
+        FlushTimeout:   time.NewTimer(config.FlushInterval),
         HTTPClient:     httpClient,
         Queue:          make(chan Line),
     }
@@ -151,10 +151,8 @@ func (adapter *Adapter) readQueue() {
                 adapter.Buffer = make([]Line, 0)
                 adapter.BufferSize = 0
             }
-
             adapter.Buffer = append(adapter.Buffer, msg)
             adapter.BufferSize += binary.Size(msg)
-
         case <-timeout.C:
             if adapter.BufferSize > 0 {
                 adapter.flushBuffer(adapter.Buffer)
