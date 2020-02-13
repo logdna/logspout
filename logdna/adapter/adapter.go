@@ -36,7 +36,7 @@ func New(config Configuration) *Adapter {
         Config:         config,
         FlushTimeout:   time.NewTimer(config.FlushInterval),
         HTTPClient:     httpClient,
-        Logger:         adapter.Logger.New(os.Stdout, config.Hostname + " ", adapter.Logger.LstdFlags),
+        Logger:         log.New(os.Stdout, config.Hostname + " ", adapter.Logger.LstdFlags),
         Queue:          make(chan Line),
     }
 
