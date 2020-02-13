@@ -106,7 +106,7 @@ func (adapter *Adapter) getTags(m *router.Message) string {
 // Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
-        if m.Data == "" {
+        if m.Data == "" || m.Container.Name == "/logdna" {
             continue
         }
 
