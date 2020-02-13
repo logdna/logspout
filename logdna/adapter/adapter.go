@@ -30,9 +30,12 @@ func New(config Configuration) *Adapter {
     )
 
     adapter := &Adapter{
-        Config:     config,
-        Queue:      make(chan Line),
-        HTTPClient: httpClient,
+        Buffer:         make([]Line, 0),
+        BufferSize:     0,
+        Config:         config,
+        FlushTimeout:   time.NewTimer(config.FlushInterval)
+        HTTPClient:     httpClient,
+        Queue:          make(chan Line),
     }
 
     go adapter.readQueue()
@@ -140,41 +143,35 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 
 // readQueue is a method for reading from queue:
 func (adapter *Adapter) readQueue() {
-
-    buffer := make([]Line, 0)
-    bufferSize := 0
-    timeout := time.NewTimer(adapter.Config.FlushInterval)
-
     for {
         select {
         case msg := <-adapter.Queue:
-            if bufferSize >= int(adapter.Config.MaxBufferSize) {
-                timeout.Stop()
-                adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0)
-                bufferSize = 0
+            if adapter.BufferSize >= int(adapter.Config.MaxBufferSize) {
+                adapter.flushBuffer(adapter.Buffer)
+                adapter.Buffer = make([]Line, 0)
+                adapter.BufferSize = 0
             }
 
-            buffer = append(buffer, msg)
-            bufferSize += binary.Size(msg)
+            adapter.Buffer = append(adapter.Buffer, msg)
+            adapter.BufferSize += binary.Size(msg)
 
         case <-timeout.C:
-            if bufferSize > 0 {
-                adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0)
-                bufferSize = 0
+            if adapter.BufferSize > 0 {
+                adapter.flushBuffer(adapter.Buffer)
+                adapter.Buffer = make([]Line, 0)
+                adapter.BufferSize = 0
             }
         }
-
-        timeout.Reset(adapter.Config.FlushInterval)
     }
 }
 
 // flushBuffer is a method for flushing the lines:
 func (adapter *Adapter) flushBuffer(buffer []Line) {
+    adapter.FlushTimeout.Stop()
+    defer adapter.FlushTimeout.Reset(adapter.Config.FlushInterval)
+
     var data bytes.Buffer
 
-    
     body := struct {
         Lines []Line `json:"lines"`
     }{

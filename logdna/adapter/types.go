@@ -3,6 +3,7 @@ package adapter
 
 import (
     "time"
+    
     "github.com/gojektech/heimdall"
 )
 
@@ -26,9 +27,12 @@ type Configuration struct {
 
 // Adapter structure:
 type Adapter struct {
-    Config      Configuration
-    Queue       chan Line
-    HTTPClient  heimdall.Client
+    Buffer          []Line
+    BufferSize      int
+    Config          Configuration
+    FlushTimeout    time.Timer
+    HTTPClient      heimdall.Client
+    Queue           chan Line
 }
 
 // Line structure for the queue of Adapter:
