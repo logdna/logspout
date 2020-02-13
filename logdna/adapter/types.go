@@ -2,6 +2,7 @@
 package adapter
 
 import (
+    "log"
     "time"
 
     "github.com/gojektech/heimdall"
@@ -32,6 +33,7 @@ type Adapter struct {
     Config          Configuration
     FlushTimeout    *time.Timer
     HTTPClient      heimdall.Client
+    Logger          *log.Logger
     Queue           chan Line
 }
 

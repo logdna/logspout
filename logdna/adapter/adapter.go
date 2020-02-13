@@ -14,6 +14,7 @@ import (
     "strings"
     "text/template"
     "time"
+
     "github.com/gliderlabs/logspout/router"
     "github.com/gojektech/heimdall"
     "github.com/gojektech/heimdall/httpclient"
@@ -35,6 +36,7 @@ func New(config Configuration) *Adapter {
         Config:         config,
         FlushTimeout:   time.NewTimer(config.FlushInterval),
         HTTPClient:     httpClient,
+        Logger:         adapter.Logger.New(os.Stdout, config.Hostname + " ", adapter.Logger.LstdFlags),
         Queue:          make(chan Line),
     }
 
@@ -125,7 +127,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
         })
 
         if err != nil {
-            log.Println(
+            adapter.Logger.Println(
                 fmt.Errorf(
                     "JSON Marshalling Error: %s",
                     err.Error(),
@@ -178,7 +180,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
 
     if error := json.NewEncoder(&data).Encode(body); error != nil {
-        log.Println(
+        adapter.Logger.Println(
             fmt.Errorf(
                 "JSON Encoding Error: %s",
                 error.Error(),
@@ -194,7 +196,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     resp, err := adapter.HTTPClient.Do(req)
 
     if err != nil {
-        log.Println(
+        adapter.Logger.Println(
             fmt.Errorf(
                 "HTTP Client Post Request Error: %s",
                 err.Error(),
@@ -205,7 +207,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
     if resp != nil {
         if resp.StatusCode != http.StatusOK {
-            log.Println(
+            adapter.Logger.Println(
                 fmt.Errorf(
                     "Received Status Code: %s While Sending Message",
                     resp.StatusCode,
