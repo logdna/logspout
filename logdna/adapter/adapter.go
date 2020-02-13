@@ -150,16 +150,14 @@ func (adapter *Adapter) readQueue() {
         case msg := <-adapter.Queue:
             if adapter.BufferSize >= int(adapter.Config.MaxBufferSize) {
                 adapter.flushBuffer(adapter.Buffer)
-                adapter.Buffer = make([]Line, 0)
-                adapter.BufferSize = 0
             }
+            adapter.Lock()
             adapter.Buffer = append(adapter.Buffer, msg)
             adapter.BufferSize += binary.Size(msg)
+            adapter.Unlock()
         case <-adapter.FlushTimeout.C:
             if adapter.BufferSize > 0 {
                 adapter.flushBuffer(adapter.Buffer)
-                adapter.Buffer = make([]Line, 0)
-                adapter.BufferSize = 0
             }
         }
     }
@@ -178,6 +176,10 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
         Lines: buffer,
     }
 
+    adapter.Lock()
+    adapter.Buffer = make([]Line, 0)
+    adapter.BufferSize = 0
+    adapter.Unlock()
 
     if error := json.NewEncoder(&data).Encode(body); error != nil {
         adapter.Logger.Println(

@@ -3,6 +3,7 @@ package adapter
 
 import (
     "log"
+    "sync"
     "time"
 
     "github.com/gojektech/heimdall"
@@ -35,6 +36,7 @@ type Adapter struct {
     HTTPClient      heimdall.Client
     Logger          *log.Logger
     Queue           chan Line
+    sync.Mutex
 }
 
 // Line structure for the queue of Adapter:
