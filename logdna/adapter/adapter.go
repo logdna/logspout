@@ -130,7 +130,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             fmt.Printf(
                 "Pre-Queue Message: %s",
                 string(messageStr),
-            )
+            ),
         )
 
         if err != nil {
@@ -159,7 +159,7 @@ func (adapter *Adapter) readQueue() {
                 fmt.Printf(
                     "Post-Queue Message: %s",
                     string(msg.Line),
-                )
+                ),
             )
 
             if adapter.BufferSize >= int(adapter.Config.MaxBufferSize) {
