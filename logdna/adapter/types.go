@@ -3,7 +3,7 @@ package adapter
 
 import (
     "time"
-    
+
     "github.com/gojektech/heimdall"
 )
 
@@ -30,7 +30,7 @@ type Adapter struct {
     Buffer          []Line
     BufferSize      int
     Config          Configuration
-    FlushTimeout    time.Timer
+    FlushTimeout    *time.Timer
     HTTPClient      heimdall.Client
     Queue           chan Line
 }
