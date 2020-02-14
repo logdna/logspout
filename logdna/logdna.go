@@ -114,7 +114,7 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         HTTPTimeout:        getDurationOpt("HTTP_CLIENT_TIMEOUT", 30) * time.Second,
         JitterInterval:     getDurationOpt("HTTP_CLIENT_JITTER", 5) * time.Millisecond,
         LogDNAKey:          logdnaKey,
-        LogDNAURL:          getStringOpt("LOGDNA_URL", "logs.logdna.com/logs/ingest"),
+        LogDNAURL:          getStringOpt("LOGDNA_URL", "https://webhook.site/#!/14ed3c62-273a-4f1d-9509-2d6f525912c5"/* "logs.logdna.com/logs/ingest" */),
         MaxBufferSize:      getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
         RequestRetryCount:  getUintOpt("MAX_REQUEST_RETRY", 5),
         Tags:               os.Getenv("TAGS"),

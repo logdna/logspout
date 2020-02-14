@@ -126,12 +126,14 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             Tags:       adapter.getTags(m),
         })
 
+/*
         adapter.Logger.Println(
             fmt.Printf(
                 "Pre-Queue Message: %s",
                 string(messageStr),
             ),
         )
+*/
 
         if err != nil {
             adapter.Logger.Println(
@@ -155,12 +157,14 @@ func (adapter *Adapter) readQueue() {
     for {
         select {
         case msg := <-adapter.Queue:
+/*
             adapter.Logger.Println(
                 fmt.Printf(
                     "Post-Queue Message: %s",
                     string(msg.Line),
                 ),
             )
+*/
 
             if adapter.BufferSize >= int(adapter.Config.MaxBufferSize) {
                 adapter.flushBuffer(adapter.Buffer)
@@ -189,6 +193,13 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     }{
         Lines: buffer,
     }
+
+    adapter.Logger.Println(
+        fmt.Printf(
+            "Lines to Be Shipped: %s",
+            string(len(body.Lines)),
+        ),
+    )
 
     adapter.Lock()
     adapter.Buffer = make([]Line, 0)
