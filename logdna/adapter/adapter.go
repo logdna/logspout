@@ -3,7 +3,6 @@ package adapter
 
 import (
     "bytes"
-    "encoding/binary"
     "encoding/json"
     "fmt"
     "log"
@@ -151,46 +150,24 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 
 // readQueue is a method for reading from queue:
 func (adapter *Adapter) readQueue() {
-    buffer := make([]Line, 0)
-    bufferSize := 0
-
+    buffer := make([]Line, 0, int(adapter.Config.MaxBufferSize))
     timeout := time.NewTimer(adapter.Config.FlushInterval)
 
     for {
         select {
         case msg := <-adapter.Queue:
-/*
-            adapter.Logger.Println(
-                fmt.Printf(
-                    "Post-Queue Message: %s",
-                    string(msg.Line),
-                ),
-            )
-*/
-            if bufferSize >= int(adapter.Config.MaxBufferSize) {
+            if len(buffer) >= cap(buffer) {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0)
-                bufferSize = 0
+                buffer = make([]Line, 0, int(adapter.Config.MaxBufferSize))
             }
 
             buffer = append(buffer, msg)
-            bufferSize += binary.Size(msg)
-
-            adapter.Logger.Println(
-                fmt.Printf(
-                    "==START==\nBuffer Size: %d\nbufferSize: %d\nMaxBufferSize:%d\n===END===\n",
-                    len(buffer),
-                    bufferSize,
-                    int(adapter.Config.MaxBufferSize),
-                ),
-            )
 
         case <-timeout.C:
             if bufferSize > 0 {
                 adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0)
-                bufferSize = 0
+                buffer = make([]Line, 0, int(adapter.Config.MaxBufferSize))
             }
         }
 
