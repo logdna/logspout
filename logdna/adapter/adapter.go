@@ -193,7 +193,10 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
         return
     }
 
-    req, _ := http.NewRequest(http.MethodPost, buildLogDNAURL(adapter.Config.LogDNAURL, adapter.Config.LogDNAKey), &data)
+    urlValues := url.Values{}
+    urlValues.Add("hostname", "logdna_logspout")
+    url := "https://" + adapter.Config.LogDNAURL + "?" + urlValues.Encode()
+    req, _ := http.NewRequest(http.MethodPost, url, &data)
     req.Header.Set("user-agent", "logspout/" + os.Getenv("BUILD_VERSION"))
     req.Header.Set("Content-Type", "application/json; charset=UTF-8")
     req.SetBasicAuth(adapter.Config.LogDNAKey, "")
@@ -220,13 +223,4 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
         }
         defer resp.Body.Close()
     }
-}
-
-func buildLogDNAURL(baseURL, token string) string {
-
-    v := url.Values{}
-    v.Add("apikey", token)
-    v.Add("hostname", "logdna_logspout")
-
-    return "https://" + baseURL + "?" + v.Encode()
 }
