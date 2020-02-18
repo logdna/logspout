@@ -123,15 +123,6 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
             Tags:       adapter.getTags(m),
         })
 
-/*
-        adapter.Logger.Println(
-            fmt.Printf(
-                "Pre-Queue Message: %s",
-                string(messageStr),
-            ),
-        )
-*/
-
         if err != nil {
             adapter.Logger.Println(
                 fmt.Errorf(
@@ -159,14 +150,6 @@ func (adapter *Adapter) readQueue() {
     for {
         select {
         case msg := <-adapter.Queue:
-/*
-            adapter.Logger.Println(
-                fmt.Printf(
-                    "Post-Queue Message: %s",
-                    string(msg.Line),
-                ),
-            )
-*/
             if bufferSize >= int(adapter.Config.MaxBufferSize) {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
@@ -175,17 +158,7 @@ func (adapter *Adapter) readQueue() {
             }
 
             buffer = append(buffer, msg)
-            bufferSize += int(unsafe.Sizeof(msg.Line)) * len(msg.Line) + int(unsafe.Sizeof(msg.File)) + int(unsafe.Sizeof(msg.Timestamp))
-
-            adapter.Logger.Println(
-                fmt.Printf(
-                    "==START==\nBuffer Size: %d\nbufferSize: %d\nmsg Size: %d\nMaxBufferSize:%d\n===END===\n",
-                    len(buffer),
-                    bufferSize,
-                    int(unsafe.Sizeof(msg.Line)) * len(msg.Line) + int(unsafe.Sizeof(msg.File)) + int(unsafe.Sizeof(msg.Timestamp)),
-                    int(adapter.Config.MaxBufferSize),
-                ),
-            )
+            bufferSize += int(unsafe.Sizeof(msg.Line)) * len(msg.Line)
 
         case <-timeout.C:
             if bufferSize > 0 {
@@ -209,13 +182,6 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     }{
         Lines: buffer,
     }
-
-    adapter.Logger.Println(
-        fmt.Printf(
-            "Lines to Be Shipped: %d",
-            len(body.Lines),
-        ),
-    )
 
     if error := json.NewEncoder(&data).Encode(body); error != nil {
         adapter.Logger.Println(
