@@ -3,7 +3,6 @@ package adapter
 
 import (
     "bytes"
-    "encoding/binary"
     "encoding/json"
     "fmt"
     "log"
@@ -14,6 +13,7 @@ import (
     "strings"
     "text/template"
     "time"
+    "unsafe"
 
     "github.com/gliderlabs/logspout/router"
     "github.com/gojektech/heimdall"
@@ -175,14 +175,14 @@ func (adapter *Adapter) readQueue() {
             }
 
             buffer = append(buffer, msg)
-            bufferSize -= binary.Size(msg)
+            bufferSize += int(unsafe.Sizeof(msg))
 
             adapter.Logger.Println(
                 fmt.Printf(
                     "==START==\nBuffer Size: %d\nbufferSize: %d\nmsg Size: %d\nMaxBufferSize:%d\n===END===\n",
                     len(buffer),
                     bufferSize,
-                    binary.Size(msg),
+                    int(unsafe.Sizeof(msg)),
                     int(adapter.Config.MaxBufferSize),
                 ),
             )
