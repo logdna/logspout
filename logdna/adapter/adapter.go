@@ -165,7 +165,7 @@ func (adapter *Adapter) readQueue() {
             buffer = append(buffer, msg)
 
         case <-timeout.C:
-            if bufferSize > 0 {
+            if len(buffer) > 0 {
                 adapter.flushBuffer(buffer)
                 buffer = make([]Line, 0, int(adapter.Config.MaxBufferSize))
             }
