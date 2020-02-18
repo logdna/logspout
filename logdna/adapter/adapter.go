@@ -175,14 +175,14 @@ func (adapter *Adapter) readQueue() {
             }
 
             buffer = append(buffer, msg)
-            bufferSize += int(unsafe.Sizeof(msg))
+            bufferSize += int(unsafe.Sizeof(msg.Line)) + int(unsafe.Sizeof(msg.File)) + int(unsafe.Sizeof(msg.Timestamp))
 
             adapter.Logger.Println(
                 fmt.Printf(
                     "==START==\nBuffer Size: %d\nbufferSize: %d\nmsg Size: %d\nMaxBufferSize:%d\n===END===\n",
                     len(buffer),
                     bufferSize,
-                    int(unsafe.Sizeof(msg)),
+                    int(unsafe.Sizeof(msg.Line)) + int(unsafe.Sizeof(msg.File)) + int(unsafe.Sizeof(msg.Timestamp)),
                     int(adapter.Config.MaxBufferSize),
                 ),
             )
