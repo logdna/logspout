@@ -179,10 +179,10 @@ func (adapter *Adapter) readQueue() {
 
             adapter.Logger.Println(
                 fmt.Printf(
-                    "==START==\nBuffer Size: %s\nbufferSize: %s\nMaxBufferSize:%s\n===END===",
-                    string(len(buffer)),
-                    string(bufferSize),
-                    string(adapter.Config.MaxBufferSize),
+                    "==START==\nBuffer Size: %d\nbufferSize: %d\nMaxBufferSize:%d\n===END===\n",
+                    len(buffer),
+                    bufferSize,
+                    int(adapter.Config.MaxBufferSize),
                 ),
             )
 
