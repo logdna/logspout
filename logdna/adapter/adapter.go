@@ -3,6 +3,7 @@ package adapter
 
 import (
     "bytes"
+    "encoding/binary"
     "encoding/json"
     "fmt"
     "log"
@@ -150,24 +151,47 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 
 // readQueue is a method for reading from queue:
 func (adapter *Adapter) readQueue() {
-    buffer := make([]Line, 0, int(adapter.Config.MaxBufferSize))
+    buffer := make([]Line, 0)
+    bufferSize := 0
+
     timeout := time.NewTimer(adapter.Config.FlushInterval)
 
     for {
         select {
         case msg := <-adapter.Queue:
-            if len(buffer) >= cap(buffer) {
+/*
+            adapter.Logger.Println(
+                fmt.Printf(
+                    "Post-Queue Message: %s",
+                    string(msg.Line),
+                ),
+            )
+*/
+            if bufferSize >= int(adapter.Config.MaxBufferSize) {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0, int(adapter.Config.MaxBufferSize))
+                buffer = make([]Line, 0)
+                bufferSize = 0
             }
 
             buffer = append(buffer, msg)
+            bufferSize -= binary.Size(msg)
+
+            adapter.Logger.Println(
+                fmt.Printf(
+                    "==START==\nBuffer Size: %d\nbufferSize: %d\nmsg Size: %d\nMaxBufferSize:%d\n===END===\n",
+                    len(buffer),
+                    bufferSize,
+                    binary.Size(msg),
+                    int(adapter.Config.MaxBufferSize),
+                ),
+            )
 
         case <-timeout.C:
-            if len(buffer) > 0 {
+            if bufferSize > 0 {
                 adapter.flushBuffer(buffer)
-                buffer = make([]Line, 0, int(adapter.Config.MaxBufferSize))
+                buffer = make([]Line, 0)
+                bufferSize = 0
             }
         }
 
@@ -188,8 +212,8 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 
     adapter.Logger.Println(
         fmt.Printf(
-            "Lines to Be Shipped: %s",
-            string(len(body.Lines)),
+            "Lines to Be Shipped: %d",
+            len(body.Lines),
         ),
     )
 
