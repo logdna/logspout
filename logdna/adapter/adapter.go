@@ -177,6 +177,15 @@ func (adapter *Adapter) readQueue() {
             buffer = append(buffer, msg)
             bufferSize += binary.Size(msg)
 
+            adapter.Logger.Println(
+                fmt.Printf(
+                    "==START==\nBuffer Size: %s\nbufferSize: %s\nMaxBufferSize:%s\n===END===",
+                    string(len(buffer)),
+                    string(bufferSize),
+                    string(adapter.Config.MaxBufferSize),
+                ),
+            )
+
         case <-timeout.C:
             if bufferSize > 0 {
                 adapter.flushBuffer(buffer)
