@@ -29,10 +29,7 @@ type Configuration struct {
 
 // Adapter structure:
 type Adapter struct {
-    Buffer          []Line
-    BufferSize      int
     Config          Configuration
-    FlushTimeout    *time.Timer
     HTTPClient      heimdall.Client
     Logger          *log.Logger
     Queue           chan Line
