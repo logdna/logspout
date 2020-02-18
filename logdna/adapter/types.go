@@ -3,7 +3,6 @@ package adapter
 
 import (
     "log"
-    "sync"
     "time"
 
     "github.com/gojektech/heimdall"
