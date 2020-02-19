@@ -6,7 +6,6 @@ import (
     "encoding/json"
     "fmt"
     "log"
-    "net"
     "net/http"
     "net/url"
     "os"
@@ -14,30 +13,30 @@ import (
     "strings"
     "text/template"
     "time"
+    "unsafe"
 
     "github.com/gliderlabs/logspout/router"
+    "github.com/gojektech/heimdall"
+    "github.com/gojektech/heimdall/httpclient"
 )
 
 // New method of Adapter:
 func New(config Configuration) *Adapter {
+    backoff := heimdall.NewConstantBackoff(config.BackoffInterval, config.JitterInterval)
+    retrier := heimdall.NewRetrier(backoff)
+    httpClient := httpclient.NewClient(
+        httpclient.WithHTTPTimeout(config.HTTPTimeout),
+        httpclient.WithRetrier(retrier),
+        httpclient.WithRetryCount(int(config.RequestRetryCount)),
+    )
+
     adapter := &Adapter{
-        Config:     config.Custom,
-        Limits:     config.Limits,
-        Log:        log.New(os.Stdout, config.Custom.Hostname + " ", log.LstdFlags),
-        LogDNAURL:  buildLogDNAURL(config.Custom.Endpoint, config.Custom.Token),
-        Queue:      make(chan Line),
-        HTTPClient: &http.Client{
-            Timeout:    config.HTTPClient.Timeout,
-            Transport:  &http.Transport{
-                IdleConnTimeout:        config.HTTPClient.IdleConnTimeout,
-                TLSHandshakeTimeout:    config.HTTPClient.TLSHandshakeTimeout,
-                DialContext: (&net.Dialer{
-                    KeepAlive: config.HTTPClient.DialContextKeepAlive,
-                    Timeout:   config.HTTPClient.DialContextTimeout,
-                }).DialContext,
-            },
-        },
+        Config:         config,
+        HTTPClient:     httpClient,
+        Logger:         log.New(os.Stdout, config.Hostname + " ", log.LstdFlags),
+        Queue:          make(chan Line),
     }
+
     go adapter.readQueue()
     return adapter
 }
@@ -72,7 +71,6 @@ func (adapter *Adapter) getTags(m *router.Message) string {
     splitTags := strings.Split(adapter.Config.Tags, ",")
     var listTags []string
     existenceMap := map[string]bool{}
-
     for _, t := range splitTags {
         parsed := false
         if matched, error := regexp.Match(`{{.+}}`, []byte(t)); matched && error == nil {
@@ -102,49 +100,41 @@ func (adapter *Adapter) getTags(m *router.Message) string {
     return strings.Join(listTags, ",")
 }
 
-// sanitizeMessage is a method for sanitizing the log message:
-func (adapter *Adapter) sanitizeMessage(message string) string {
-    if uint64(len(message)) > adapter.Limits.MaxLineLength {
-        return message[0:adapter.Limits.MaxLineLength] + " (cut off, too long...)"
-    }
-    return message
-}
-
 // Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
-        if adapter.Config.Verbose || m.Container.Config.Image != "logdna/logspout" {
-            messageStr, err := json.Marshal(Message{
-                Message:    adapter.sanitizeMessage(m.Data),
-                Container:  ContainerInfo{
-                    Name:   m.Container.Name,
-                    ID:     m.Container.ID,
-                    PID:    m.Container.State.Pid,
-                    Config: ContainerConfig{
-                        Image:      m.Container.Config.Image,
-                        Hostname:   m.Container.Config.Hostname,
-                        Labels:     m.Container.Config.Labels,
-                    },
-                },
-                Level:      adapter.getLevel(m.Source),
-                Hostname:   adapter.getHost(m.Container.Config.Hostname),
-                Tags:       adapter.getTags(m),
-            })
+        if m.Data == "" || m.Container.Name == "/logdna" {
+            continue
+        }
 
-            if err != nil {
-                adapter.Log.Println(
-                    fmt.Errorf(
-                        "JSON Marshalling Error: %s",
-                        err.Error(),
-                    ),
-                )
-            } else {
-                adapter.Queue <- Line{
-                    Line:       string(messageStr),
-                    File:       m.Container.Name,
-                    Timestamp:  time.Now().Unix(),
-                    Retried:    0,
-                }
+        messageStr, err := json.Marshal(Message{
+            Message:    m.Data,
+            Container:  ContainerInfo{
+                Name:   m.Container.Name,
+                ID:     m.Container.ID,
+                Config: ContainerConfig{
+                    Image:      m.Container.Config.Image,
+                    Hostname:   m.Container.Config.Hostname,
+                    Labels:     m.Container.Config.Labels,
+                },
+            },
+            Level:      adapter.getLevel(m.Source),
+            Hostname:   adapter.getHost(m.Container.Config.Hostname),
+            Tags:       adapter.getTags(m),
+        })
+
+        if err != nil {
+            adapter.Logger.Println(
+                fmt.Errorf(
+                    "JSON Marshalling Error: %s",
+                    err.Error(),
+                ),
+            )
+        } else {
+            adapter.Queue <- Line{
+                Line:       string(messageStr),
+                File:       m.Container.Name,
+                Timestamp:  time.Now().Unix(),
             }
         }
     }
@@ -152,38 +142,39 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 
 // readQueue is a method for reading from queue:
 func (adapter *Adapter) readQueue() {
-
     buffer := make([]Line, 0)
-    timeout := time.NewTimer(adapter.Limits.FlushInterval)
-    byteSize := 0
+    bufferSize := 0
+
+    timeout := time.NewTimer(adapter.Config.FlushInterval)
 
     for {
         select {
         case msg := <-adapter.Queue:
-            if uint64(byteSize) >= adapter.Limits.MaxBufferSize {
+            if bufferSize >= int(adapter.Config.MaxBufferSize) {
                 timeout.Stop()
                 adapter.flushBuffer(buffer)
-                timeout.Reset(adapter.Limits.FlushInterval)
                 buffer = make([]Line, 0)
-                byteSize = 0
+                bufferSize = 0
             }
 
             buffer = append(buffer, msg)
-            byteSize += len(msg.Line)
+            bufferSize += len(msg.Line)
 
         case <-timeout.C:
-            if len(buffer) > 0 {
+            if bufferSize > 0 {
                 adapter.flushBuffer(buffer)
-                timeout.Reset(adapter.Limits.FlushInterval)
                 buffer = make([]Line, 0)
-                byteSize = 0
+                bufferSize = 0
             }
         }
+
+        timeout.Reset(adapter.Config.FlushInterval)
     }
 }
 
 // flushBuffer is a method for flushing the lines:
 func (adapter *Adapter) flushBuffer(buffer []Line) {
+
     var data bytes.Buffer
 
     body := struct {
@@ -193,7 +184,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
     }
 
     if error := json.NewEncoder(&data).Encode(body); error != nil {
-        adapter.Log.Println(
+        adapter.Logger.Println(
             fmt.Errorf(
                 "JSON Encoding Error: %s",
                 error.Error(),
@@ -202,25 +193,28 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
         return
     }
 
-    resp, err := adapter.HTTPClient.Post(adapter.LogDNAURL, "application/json; charset=UTF-8", &data)
+    urlValues := url.Values{}
+    urlValues.Add("hostname", "logdna_logspout")
+    url := "https://" + adapter.Config.LogDNAURL + "?" + urlValues.Encode()
+    req, _ := http.NewRequest(http.MethodPost, url, &data)
+    req.Header.Set("user-agent", "logspout/" + os.Getenv("BUILD_VERSION"))
+    req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+    req.SetBasicAuth(adapter.Config.LogDNAKey, "")
+    resp, err := adapter.HTTPClient.Do(req)
 
     if err != nil {
-        if _, ok := err.(net.Error); ok {
-            go adapter.retry(buffer)
-        } else {
-            adapter.Log.Println(
-                fmt.Errorf(
-                    "HTTP Client Post Request Error: %s",
-                    err.Error(),
-                ),
-            )
-        }
+        adapter.Logger.Println(
+            fmt.Errorf(
+                "HTTP Client Post Request Error: %s",
+                err.Error(),
+            ),
+        )
         return
     }
 
     if resp != nil {
         if resp.StatusCode != http.StatusOK {
-            adapter.Log.Println(
+            adapter.Logger.Println(
                 fmt.Errorf(
                     "Received Status Code: %s While Sending Message",
                     resp.StatusCode,
@@ -229,23 +223,4 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
         }
         defer resp.Body.Close()
     }
-}
-
-// retry sending the buffer:
-func (adapter *Adapter) retry(buffer []Line) {
-    for _, line := range buffer {
-        if line.Retried < adapter.Limits.MaxRequestRetry {
-            line.Retried++
-            adapter.Queue <- line
-        }
-    }
-}
-
-func buildLogDNAURL(baseURL, token string) string {
-
-    v := url.Values{}
-    v.Add("apikey", token)
-    v.Add("hostname", "logdna_logspout")
-
-    return "https://" + baseURL + "?" + v.Encode()
 }

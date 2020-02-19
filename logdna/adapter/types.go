@@ -3,8 +3,9 @@ package adapter
 
 import (
     "log"
-    "net/http"
     "time"
+
+    "github.com/gojektech/heimdall"
 )
 
 /*
@@ -13,45 +14,24 @@ import (
 
 // Configuration is Configuration Struct for LogDNA Adapter:
 type Configuration struct {
-    Custom      CustomConfiguration
-    HTTPClient  HTTPClientConfiguration
-    Limits      LimitConfiguration
-}
-
-// CustomConfiguration is Custom SubConfiguration:
-type CustomConfiguration struct {
-    Endpoint    string
-    Hostname    string
-    Tags        string
-    Token       string
-    Verbose     bool
-}
-
-// LimitConfiguration is SubConfiguration for Limits:
-type LimitConfiguration struct {
-    FlushInterval   time.Duration
-    MaxBufferSize   uint64
-    MaxLineLength   uint64
-    MaxRequestRetry uint64
-}
-
-// HTTPClientConfiguration is for Configuring HTTP Client:
-type HTTPClientConfiguration struct {
-    DialContextTimeout      time.Duration
-    DialContextKeepAlive    time.Duration
-    IdleConnTimeout         time.Duration
-    Timeout                 time.Duration
-    TLSHandshakeTimeout     time.Duration
+    BackoffInterval     time.Duration
+    FlushInterval       time.Duration
+    Hostname            string
+    HTTPTimeout         time.Duration
+    JitterInterval      time.Duration
+    LogDNAKey           string
+    LogDNAURL           string
+    MaxBufferSize       uint64
+    RequestRetryCount   uint64
+    Tags                string
 }
 
 // Adapter structure:
 type Adapter struct {
-    Config      CustomConfiguration
-    Limits      LimitConfiguration
-    Log         *log.Logger
-    LogDNAURL   string
-    Queue       chan Line
-    HTTPClient  *http.Client
+    Config          Configuration
+    HTTPClient      heimdall.Client
+    Logger          *log.Logger
+    Queue           chan Line
 }
 
 // Line structure for the queue of Adapter:
@@ -59,7 +39,6 @@ type Line struct {
     Timestamp   int64  `json:"timestamp"`
     Line        string `json:"line"`
     File        string `json:"file"`
-    Retried     uint64 `json:"-"`
 }
 
 // Message structure:
@@ -75,7 +54,6 @@ type Message struct {
 type ContainerInfo struct {
     Name    string          `json:"name"`
     ID      string          `json:"id"`
-    PID     int             `json:"pid",omitempty`
     Config  ContainerConfig `json:"config"`
 }
 

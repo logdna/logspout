@@ -36,6 +36,34 @@ import (
     "github.com/logdna/logspout/logdna/adapter"
 )
 
+/*
+    Common Functions
+*/
+
+// Getting Uint Variable from Environment:
+func getUintOpt(name string, dfault uint64) uint64 {
+    if result, err := strconv.ParseUint(os.Getenv(name), 10, 64); err == nil {
+        return result
+    }
+    return dfault
+}
+
+// Getting Duration Variable from Environment:
+func getDurationOpt(name string, dfault time.Duration) time.Duration {
+    if result, err := strconv.ParseInt(os.Getenv(name), 10, 64); err == nil {
+        return time.Duration(result)
+    }
+    return dfault
+}
+
+// Getting String Variable from Environment:
+func getStringOpt(name, dfault string) string {
+    if value := os.Getenv(name); value != "" {
+        return value
+    }
+    return dfault
+}
+
 func init() {
     router.AdapterFactories.Register(NewLogDNAAdapter, "logdna")
 
@@ -64,59 +92,37 @@ func init() {
 
 // NewLogDNAAdapter creates adapter:
 func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
-    token := os.Getenv("LOGDNA_KEY")
-    if token == "" {
+    logdnaKey := os.Getenv("LOGDNA_KEY")
+    if logdnaKey == "" {
         return nil, errors.New("Cannot Find Environment Variable \"LOGDNA_KEY\"")
     }
 
-    config := adapter.Configuration{
-        Custom:         adapter.CustomConfiguration{
-            Endpoint:   getStringOpt("LOGDNA_URL", "logs.logdna.com/logs/ingest"),
-            Hostname:   getStringOpt("HOSTNAME", ""),
-            Tags:       getStringOpt("TAGS", ""),
-            Token:      token,
-            Verbose:    os.Getenv("VERBOSE") != "0",
-        }, HTTPClient:  adapter.HTTPClientConfiguration{
-            DialContextKeepAlive:   getDurationOpt("DIAL_KEEP_ALIVE", 60) * time.Second,        // 30 by Default
-            DialContextTimeout:     getDurationOpt("DIAL_TIMEOUT", 60) * time.Second,           // 30 by Default
-            IdleConnTimeout:        getDurationOpt("IDLE_CONN_TIMEOUT", 60) * time.Second,      // 90 by Default
-            Timeout:                getDurationOpt("HTTP_CLIENT_TIMEOUT", 60) * time.Second,    // 30 by Default
-            TLSHandshakeTimeout:    getDurationOpt("TLS_HANDSHAKE_TIMEOUT", 30) * time.Second,   // 10 by Default
-        }, Limits:      adapter.LimitConfiguration{
-            FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
-            MaxBufferSize:      getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
-            MaxLineLength:      getUintOpt("MAX_LINE_LENGTH", 16000),
-            MaxRequestRetry:    getUintOpt("MAX_REQUEST_RETRY", 10),
-        },
+    hostname := os.Getenv("HOSTNAME")
+    if hostname == "" {
+        host, err := os.Hostname()
+        if err {
+            return nil, errors.New("Cannot Get Hostname Information")
+        }
+
+        hostname = host
     }
 
     if os.Getenv("INACTIVITY_TIMEOUT") == "" {
         os.Setenv("INACTIVITY_TIMEOUT", "1m")
     }
 
+    config := adapter.Configuration{
+        BackoffInterval:    getDurationOpt("HTTP_CLIENT_BACKOFF", 2) * time.Millisecond,
+        FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
+        Hostname:           hostname,
+        HTTPTimeout:        getDurationOpt("HTTP_CLIENT_TIMEOUT", 30) * time.Second,
+        JitterInterval:     getDurationOpt("HTTP_CLIENT_JITTER", 5) * time.Millisecond,
+        LogDNAKey:          logdnaKey,
+        LogDNAURL:          getStringOpt("LOGDNA_URL", "logs.logdna.com/logs/ingest"),
+        MaxBufferSize:      getUintOpt("MAX_BUFFER_SIZE", 2) * 1024 * 1024,
+        RequestRetryCount:  getUintOpt("MAX_REQUEST_RETRY", 5),
+        Tags:               os.Getenv("TAGS"),
+    }
+
     return adapter.New(config), nil
-}
-
-// Getting Uint Variable from Environment:
-func getUintOpt(name string, dfault uint64) uint64 {
-    if result, err := strconv.ParseUint(os.Getenv(name), 10, 64); err == nil {
-        return result
-    }
-    return dfault
-}
-
-// Getting Duration Variable from Environment:
-func getDurationOpt(name string, dfault time.Duration) time.Duration {
-    if result, err := strconv.ParseInt(os.Getenv(name), 10, 64); err == nil {
-        return time.Duration(result)
-    }
-    return dfault
-}
-
-// Getting String Variable from Environment:
-func getStringOpt(name, dfault string) string {
-    if value := os.Getenv(name); value != "" {
-        return value
-    }
-    return dfault
 }
