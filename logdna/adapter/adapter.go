@@ -158,7 +158,7 @@ func (adapter *Adapter) readQueue() {
             }
 
             buffer = append(buffer, msg)
-            bufferSize += int(unsafe.Sizeof(msg.Line)) * len(msg.Line)
+            bufferSize += len(msg.Line)
 
         case <-timeout.C:
             if bufferSize > 0 {
