@@ -1,17 +1,14 @@
 [![CircleCI](https://circleci.com/gh/logdna/logspout.svg?style=svg)](https://circleci.com/gh/logdna/logspout)
 
 # LogDNA LogSpout
-
 A Docker LogSpout image to stream logs from your containers to LogDNA.
 
 ## How to Use
 
 ### Environment Variables
-
 The following variables can be used to tune `LogSpout` for specific use cases.
 
 #### Log Router Specific
-
 * __FILTER_NAME__: Filter by Container Name with Wildcards, *Optional*
 * __FILTER_ID__: Filter by Container ID with Wildcards, *Optional*
 * __FILTER_SOURCES__: Filter by Comma-Separated List of Sources, *Optional*
@@ -20,7 +17,6 @@ The following variables can be used to tune `LogSpout` for specific use cases.
 __Note__: More information can be found [here](https://github.com/gliderlabs/logspout/tree/0da75a223db992cd5abc836796174588ddfc62b4/routesapi#routes-resource).
 
 #### Ingestion Specific
-
 * __LOGDNA_KEY__: LogDNA Ingestion Key, *Required*
 * __HOSTNAME__: Alternative Hostname, *Optional*
   * __Default__: System's Hostname
@@ -45,7 +41,6 @@ __Note__: Logging the `LogSpout` Container is recommended to keep track of HTTP 
   * __Default__: 5
 
 ### Docker
-
 Create and run container named *logdna* from this image using CLI:
 ```bash
 sudo docker run --name="logdna" --restart=always \
@@ -55,7 +50,6 @@ logdna/logspout:latest
 ```
 
 ### Docker Cloud
-
 Append the following to your Docker Cloud stackfile:
 ```yaml
 logdna:
@@ -71,7 +65,6 @@ logdna:
 ```
 
 ### Elastic Container Service (ECS)
-
 Modify your ECS Cloud Configuration file to have `LogDNA` Service as described below:
 ```yaml
 services:
@@ -88,7 +81,6 @@ services:
 ```
 
 ### Rancher
-
 Modify your Rancher Compose Stackfile to have `LogDNA` Service as described below:
 ```yaml
 version: '2'
@@ -107,7 +99,6 @@ services:
 ```
 
 ### Docker Swarm
-
 Modify your Docker Swarm Compose file to have `LogDNA` Service as described below:
 ```yaml
 version: "3"
@@ -128,9 +119,7 @@ services:
 ```
 
 ### Notes
-
 Do not forget to add `-u root` (in CLI) or `user: root` (in YAML) in case of having permission issues.
 
 ## Contributing
-
 Contributions are always welcome. See the [contributing guide](/CONTRIBUTING.md) to learn how you can help. Build instructions for the agent are also in the guide.
