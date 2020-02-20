@@ -102,7 +102,7 @@ func (adapter *Adapter) getTags(m *router.Message) string {
 // Stream method is for streaming the messages:
 func (adapter *Adapter) Stream(logstream chan *router.Message) {
     for m := range logstream {
-        if m.Data == "" || m.Container.Name == "/logdna" {
+        if m.Data == "" {
             continue
         }
 
@@ -173,7 +173,6 @@ func (adapter *Adapter) readQueue() {
 
 // flushBuffer is a method for flushing the lines:
 func (adapter *Adapter) flushBuffer(buffer []Line) {
-
     var data bytes.Buffer
 
     body := struct {

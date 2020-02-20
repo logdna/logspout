@@ -100,7 +100,7 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
     hostname := os.Getenv("HOSTNAME")
     if hostname == "" {
         host, err := os.Hostname()
-        if err {
+        if err != nil {
             return nil, errors.New("Cannot Get Hostname Information")
         }
 
