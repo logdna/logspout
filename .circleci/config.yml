@@ -31,10 +31,10 @@ jobs:
           name: Check Tagged Push
           command: |
             PKG_VERSION=$(grep VERSION Dockerfile | cut -d' ' -f3)
-            if [[ \"${CIRCLE_TAG}\" != \"v${PKG_VERSION}\" ]]; then
-              echo \"There is mismatch:\"
-              echo \"  TAG_VERSION: ${CIRCLE_TAG}\"
-              echo \"  PKG_VERSION: v${PKG_VERSION}\"
+            if [[ "${CIRCLE_TAG}" != "v${PKG_VERSION}" ]]; then
+              echo "There is mismatch:"
+              echo "  TAG_VERSION: ${CIRCLE_TAG}"
+              echo "  PKG_VERSION: v${PKG_VERSION}"
               exit 1
             fi
       - run: docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} .
@@ -53,11 +53,11 @@ jobs:
       - run:
           name: Create a Release
           command: |
-            ghr \\
-              -n \"LogDNA LogSpout ${CIRCLE_TAG}\"
-              -t \"${GITHUB_TOKEN}\"
-              -u ${CIRCLE_PROJECT_USERNAME} \\
-              -r ${CIRCLE_PROJECT_REPONAME} \\
+            ghr \
+              -n "LogDNA LogSpout ${CIRCLE_TAG}" \
+              -t ${GITHUB_TOKEN} \
+              -u ${CIRCLE_PROJECT_USERNAME} \
+              -r ${CIRCLE_PROJECT_REPONAME} \
               -draft ${CIRCLE_TAG} ./image.tar
   approve:
     machine: true
