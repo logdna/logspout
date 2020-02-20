@@ -13,7 +13,6 @@ import (
     "strings"
     "text/template"
     "time"
-    "unsafe"
 
     "github.com/gliderlabs/logspout/router"
     "github.com/gojektech/heimdall"
