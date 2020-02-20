@@ -97,16 +97,6 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
         return nil, errors.New("Cannot Find Environment Variable \"LOGDNA_KEY\"")
     }
 
-    hostname := os.Getenv("HOSTNAME")
-    if hostname == "" {
-        host, err := os.Hostname()
-        if err != nil {
-            return nil, errors.New("Cannot Get Hostname Information")
-        }
-
-        hostname = host
-    }
-
     if os.Getenv("INACTIVITY_TIMEOUT") == "" {
         os.Setenv("INACTIVITY_TIMEOUT", "1m")
     }
@@ -114,7 +104,7 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
     config := adapter.Configuration{
         BackoffInterval:    getDurationOpt("HTTP_CLIENT_BACKOFF", 2) * time.Millisecond,
         FlushInterval:      getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
-        Hostname:           hostname,
+        Hostname:           os.Getenv("HOSTNAME"),
         HTTPTimeout:        getDurationOpt("HTTP_CLIENT_TIMEOUT", 30) * time.Second,
         JitterInterval:     getDurationOpt("HTTP_CLIENT_JITTER", 5) * time.Millisecond,
         LogDNAKey:          logdnaKey,
