@@ -109,7 +109,7 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
         messageStr, err := json.Marshal(Message{
             Message:    m.Data,
             Container:  ContainerInfo{
-                Name:   m.Container.Name,
+                Name:   strings.Trim(m.Container.Name, "/"),
                 ID:     m.Container.ID,
                 Config: ContainerConfig{
                     Image:      m.Container.Config.Image,
