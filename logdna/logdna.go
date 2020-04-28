@@ -26,7 +26,6 @@ package logdna
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -79,8 +78,6 @@ func metrics() http.Handler {
 func init() {
 	router.HTTPHandlers.Register(metrics, "metrics")
 	router.AdapterFactories.Register(NewLogDNAAdapter, "logdna")
-
-	fmt.Println(router.HTTPHandlers.All())
 
 	filterLabels := make([]string, 0)
 	if filterLabelsValue := os.Getenv("FILTER_LABELS"); filterLabelsValue != "" {
