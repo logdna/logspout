@@ -34,9 +34,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/angulito/logspout/logdna/adapter"
 	"github.com/gliderlabs/logspout/router"
 	"github.com/gorilla/mux"
+	"github.com/logdna/logspout/logdna/adapter"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
