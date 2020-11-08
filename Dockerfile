@@ -4,13 +4,14 @@ RUN mkdir -p /go/src/github.com/gliderlabs && \
     cp -r /src /go/src/github.com/gliderlabs/logspout
 WORKDIR /go/src/github.com/gliderlabs/logspout
 ENV GOPATH=/go
+ENV CGO_ENABLED=0
 RUN go get
 RUN go build -ldflags "-X main.Version=$(cat VERSION)-logdna" -o /bin/logspout
 
 
-FROM alpine:3.12
+FROM scratch
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /bin/logspout /bin/logspout
 ENV BUILD_VERSION=1.2.0
 VOLUME /mnt/routes
-RUN ln -fs /tmp/docker.sock /var/run/docker.sock
 ENTRYPOINT ["/bin/logspout"]
