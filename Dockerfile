@@ -1,4 +1,11 @@
 FROM gliderlabs/logspout:latest AS builder
+RUN apk add --no-cache --update go build-base git mercurial ca-certificates
+RUN mkdir -p /go/src/github.com/gliderlabs && \
+    cp -r /src /go/src/github.com/gliderlabs/logspout
+WORKDIR /go/src/github.com/gliderlabs/logspout
+ENV GOPATH=/go
+RUN go get
+RUN go build -ldflags "-X main.Version=$(cat VERSION)-logdna" -o /bin/logspout
 
 
 FROM alpine:3.12
