@@ -3,6 +3,10 @@ RUN apk add --no-cache --update go build-base git mercurial ca-certificates
 RUN mkdir -p /go/src/github.com/gliderlabs && \
     cp -r /src /go/src/github.com/gliderlabs/logspout
 WORKDIR /go/src/github.com/gliderlabs/logspout
+ARG ARCH=amd64
+ARG OS=linux
+ENV GOARCH=${ARCH}
+ENV GOOS=${OS}
 ENV GOPATH=/go
 ENV CGO_ENABLED=0
 RUN go get
