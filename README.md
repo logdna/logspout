@@ -43,9 +43,9 @@ __Note__: Logging the `LogSpout` Container is recommended to keep track of HTTP 
 ### Docker
 Create and run container named *logdna* from this image using CLI:
 ```bash
-sudo docker run --name="logdna" --restart=always \
+sudo docker run --name=logdna --restart=always \
 -d -v=/var/run/docker.sock:/var/run/docker.sock \
--e LOGDNA_KEY="<LogDNA Ingestion Key>" \
+-e LOGDNA_KEY=<LogDNA Ingestion Key> \
 logdna/logspout:latest
 ```
 
@@ -56,9 +56,9 @@ logdna:
   autoredeploy: true
   deployment_strategy: every_node
   environment:
-    - LOGDNA_KEY="<LogDNA Ingestion Key>"
+    - LOGDNA_KEY=<LogDNA Ingestion Key>
     - TAGS='{{.Container.Config.Hostname}}'
-  image: 'logdna/logspout:latest'
+  image: logdna/logspout:latest
   restart: always
   volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
@@ -70,7 +70,7 @@ Modify your ECS Cloud Configuration file to have `LogDNA` Service as described b
 services:
   logdna:
     environment:
-        - LOGDNA_KEY="<LogDNA Ingestion Key>"
+        - LOGDNA_KEY=<LogDNA Ingestion Key>
         - TAGS='{{ if .Container.Config.Labels }}{{index .Container.Config.Labels "com.amazonaws.ecs.task-definition-family"}}:{{index .Container.Config.Labels "com.amazonaws.ecs.container-name"}}{{ else }}{{.ContainerName}}{{ end }}'
     image: logdna/logspout:latest
     restart: always
@@ -88,7 +88,7 @@ services:
   logdna:
     image: logdna/logspout:latest
     environment:
-      LOGDNA_KEY="<LogDNA Ingestion Key>"
+      LOGDNA_KEY=<LogDNA Ingestion Key>
     restart: always
     labels:
       io.rancher.container.hostname_override: container_name
@@ -113,7 +113,7 @@ services:
       - /etc/hostname:/etc/host_hostname:ro
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - LOGDNA_KEY="<LogDNA Ingestion Key>"
+      - LOGDNA_KEY=<LogDNA Ingestion Key>
     deploy:
       mode: global
 ```
