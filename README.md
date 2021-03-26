@@ -121,5 +121,17 @@ services:
 ### Notes
 Do not forget to add `-u root` (in CLI) or `user: root` (in YAML) in case of having permission issues.
 
+### Seperating inputs
+Users may wish to seperate stdout and stderr from a given container in order to tag it before ingestion. In order to archive this the use can set the `FILTER_SOURCES` appropriately.
+
+```
+FILTER_SOURCES: "stdout"
+TAGS: "stdout"
+```
+
+If tagging `stdout` and `stderr` two seperate containers will be required.
+
+
+
 ## Contributing
 Contributions are always welcome. See the [contributing guide](/CONTRIBUTING.md) to learn how you can help. Build instructions for the agent are also in the guide.
