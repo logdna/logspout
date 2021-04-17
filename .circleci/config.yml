@@ -30,7 +30,7 @@ jobs:
       - run:
           name: Check Tagged Push
           command: |
-            PKG_VERSION=$(grep BUILD_VERSION Dockerfile | cut -d' ' -f3)
+            PKG_VERSION=$(grep BUILD_VERSION Dockerfile | cut -d'=' -f2)
             if [[ "${CIRCLE_TAG}" != "v${PKG_VERSION}" ]]; then
               echo "There is mismatch:"
               echo "  TAG_VERSION: ${CIRCLE_TAG}"
