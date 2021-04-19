@@ -1,6 +1,6 @@
+TAG          = $(if $(CIRCLE_TAG),$(CIRCLE_TAG),PRTEST)
 REPO         = ${USERNAME}
 NAME         = logspout
-TAG          = ${CIRCLE_TAG}
 IMAGE        = $(REPO)/$(NAME)
 IMAGE_AMD64  = $(IMAGE):$(TAG)-amd64
 IMAGE_ARM64  = $(IMAGE):$(TAG)-arm64
@@ -20,6 +20,7 @@ build:
 	docker save -o image.tar $(IMAGE_AMD64) $(IMAGE_ARM64)
 
 publish:
+	docker login --username ${USERNAME} --password ${PASSWORD}
 	docker load -i ./image.tar
 	docker push $(IMAGE_AMD64)
 	docker push $(IMAGE_ARM64)
