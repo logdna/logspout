@@ -17,14 +17,17 @@ jobs:
       - checkout
       - run: go get -u golang.org/x/lint/golint
       - run: golint logdna/
-  imagest:
-    machine: true
+  imagetest:
+    machine:
+      image: ubuntu-2004:202101-01
     steps:
       - checkout
-      - run: docker build -f Dockerfile .
+      - run: make build
   build:
     machine:
       docker_layer_caching: true
+      # This image contains a more recent version of docker to support `docker manifest`
+      image: ubuntu-2004:202101-01
     steps:
       - checkout
       - run:
@@ -37,8 +40,7 @@ jobs:
               echo "  PKG_VERSION: v${PKG_VERSION}"
               exit 1
             fi
-      - run: docker build -f Dockerfile -t ${USERNAME}/${IMAGE}:${TAG} .
-      - run: docker save -o image.tar ${USERNAME}/${IMAGE}:${TAG}
+      - run: make build
       - persist_to_workspace:
           root: .
           paths:
@@ -71,13 +73,11 @@ jobs:
   publish:
     machine:
       docker_layer_caching: true
+      image: ubuntu-2004:202101-01
     steps:
       - attach_workspace:
           at: .
-      - run: docker load -i ./image.tar
-      - run: docker tag ${USERNAME}/${IMAGE}:${TAG} ${USERNAME}/${IMAGE}:${CIRCLE_TAG}
-      - run: docker login --username ${USERNAME} --password ${PASSWORD}
-      - run: docker push ${USERNAME}/${IMAGE}
+      - run: make publish
 workflows:
   update:
     jobs:
@@ -104,7 +104,7 @@ workflows:
     jobs:
       - test:
           filters: *test_build_filters
-      - imagest:
+      - imagetest:
           requires:
             - test
           filters: *test_build_filters
