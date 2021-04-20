@@ -45,6 +45,7 @@ jobs:
           root: .
           paths:
             - ./image.tar
+            - ./Makefile
   release:
     docker:
       - image: circleci/golang:1.12
@@ -77,7 +78,6 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - checkout
       - run: make publish
 workflows:
   update:
