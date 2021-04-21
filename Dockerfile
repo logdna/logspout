@@ -16,6 +16,6 @@ RUN go build -ldflags "-X main.Version=$(cat VERSION)-logdna" -o /bin/logspout
 FROM scratch
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /bin/logspout /bin/logspout
-ENV BUILD_VERSION=1.3.0
+ENV BUILD_VERSION=1.3.1
 VOLUME /mnt/routes
 ENTRYPOINT ["/bin/logspout"]
