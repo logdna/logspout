@@ -2,6 +2,9 @@
 
 This file documents all notable changes in `LogDNA LogSpout Image`. The release numbering uses [semantic versioning](http://semver.org).
 
+## v1.3.1 - Released on April 21, 2021
+* Removes a file that was erroneously committed to the repository
+
 ## v1.3.0 - Released on April 20, 2021
 * Add a Makefile to do builds for multiple architectures (amd64, arm64)
     * Correct CI workflow to build from a `Makefile`
