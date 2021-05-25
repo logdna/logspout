@@ -51,7 +51,8 @@ func (adapter *Adapter) getLevel(source string) string {
 	return ""
 }
 
-// getHost method is for deciding what to choose as a hostname:
+// getHost sets the hostname to the container's hostname, provided that /etc/host_hostname
+// nor the environment variable `HOSTNAME` is not set.
 func (adapter *Adapter) getHost(containerHostname string) string {
 	host := containerHostname
 	if adapter.Config.Hostname != "" {

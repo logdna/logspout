@@ -26,6 +26,7 @@ package logdna
 
 import (
 	"errors"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -33,7 +34,7 @@ import (
 	"time"
 
 	"github.com/gliderlabs/logspout/router"
-	"github.com/logdna/logspout/logdna/adapter"
+	"logdna/adapter"
 )
 
 /*
@@ -101,10 +102,19 @@ func NewLogDNAAdapter(route *router.Route) (router.LogAdapter, error) {
 		os.Setenv("INACTIVITY_TIMEOUT", "1m")
 	}
 
+	// Follow logspout's implementation which allows hostname to be set from a special file
+	var hostName string
+	content, err := ioutil.ReadFile("/etc/host_hostname")
+	if err == nil && len(content) > 0 {
+		hostName = strings.TrimRight(string(content), "\r\n")
+	} else {
+		hostName = os.Getenv("HOSTNAME")
+	}
+
 	config := adapter.Configuration{
 		BackoffInterval:   getDurationOpt("HTTP_CLIENT_BACKOFF", 2) * time.Millisecond,
 		FlushInterval:     getDurationOpt("FLUSH_INTERVAL", 250) * time.Millisecond,
-		Hostname:          os.Getenv("HOSTNAME"),
+		Hostname:          hostName,
 		HTTPTimeout:       getDurationOpt("HTTP_CLIENT_TIMEOUT", 30) * time.Second,
 		JitterInterval:    getDurationOpt("HTTP_CLIENT_JITTER", 5) * time.Millisecond,
 		LogDNAKey:         logdnaKey,
