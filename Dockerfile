@@ -1,4 +1,4 @@
-FROM gliderlabs/logspout:latest AS builder
+FROM gliderlabs/logspout:v3.2.13 AS builder
 RUN apk add --no-cache --update go build-base git mercurial ca-certificates
 RUN mkdir -p /go/src/github.com/gliderlabs && \
     cp -r /src /go/src/github.com/gliderlabs/logspout
