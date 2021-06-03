@@ -215,7 +215,7 @@ func (adapter *Adapter) flushBuffer(buffer []Line) {
 		if resp.StatusCode != http.StatusOK {
 			adapter.Logger.Println(
 				fmt.Errorf(
-					"Received Status Code: %s While Sending Message",
+					"Received Status Code: %d While Sending Message",
 					resp.StatusCode,
 				),
 			)

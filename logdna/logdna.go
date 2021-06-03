@@ -33,8 +33,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gliderlabs/logspout/router"
 	"logdna/adapter"
+
+	"github.com/gliderlabs/logspout/router"
 )
 
 /*
