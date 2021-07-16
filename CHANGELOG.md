@@ -2,6 +2,9 @@
 
 This file documents all notable changes in `LogDNA LogSpout Image`. The release numbering uses [semantic versioning](http://semver.org).
 
+## v1.3.2
+* Add Prometheus metrics
+
 ## v1.3.1 - Released on April 21, 2021
 * Removes a file that was erroneously committed to the repository
 
