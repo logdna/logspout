@@ -2,6 +2,10 @@
 
 This file documents all notable changes in `LogDNA LogSpout Image`. The release numbering uses [semantic versioning](http://semver.org).
 
+## v1.3.2 - Released on July 25, 2023
+* Changed auth mechinism to use `apiKey` instead of basic auth
+    * this makes it compatible with pipeine ingest
+
 ## v1.3.1 - Released on April 21, 2021
 * Removes a file that was erroneously committed to the repository
 
