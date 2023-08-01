@@ -1,0 +1,4 @@
+_template_version: v1.2.8
+github_org: logdna
+go_version: '1.12'
+project_name: logspout

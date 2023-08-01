@@ -1,0 +1,11 @@
+logspout
+version
+.go/
+dist/
+reports/
+
+goreleaser
+svu
+
+#ignore files created by debugger
+__debug_bin

@@ -1,0 +1,26 @@
+project_name: logspout
+archives:
+    - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+builds:
+  - env:
+    - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    goarm:
+      - 8
+    goamd64:
+      - v1
+    ldflags:
+      - "-X main.ARCH={{ .Arch }} -X main.OS={{ .Os }} -X main.SEMVER={{ .Version }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+snapshot:
+  name_template: "{{ .Version }}-{{ .Branch }}"
