@@ -54,19 +54,16 @@ build:
 		-f Dockerfile .
 	docker save -o image.tar $(IMAGE_AMD64) $(IMAGE_ARM64)
 
-.PHONY: create-manifest
-create-manifest:
-	docker load -i ./image.tar
-	docker manifest create $(IMAGE):$(TAG) $(IMAGE_AMD64) $(IMAGE_ARM64)
-	docker manifest annotate $(IMAGE):$(TAG) $(IMAGE_ARM64) --arch arm64 --os linux
-	docker manifest create $(IMAGE):latest $(IMAGE_AMD64) $(IMAGE_ARM64)
-	docker manifest annotate $(IMAGE):latest $(IMAGE_ARM64) --arch arm64 --os linux
-
 .PHONY: publish
-publish: create-manifest
+publish:
+	docker load -i ./image.tar
 	docker push $(IMAGE_AMD64)
 	docker push $(IMAGE_ARM64)
+	docker manifest create $(IMAGE):$(TAG) $(IMAGE_AMD64) $(IMAGE_ARM64)
+	docker manifest annotate $(IMAGE):$(TAG) $(IMAGE_ARM64) --arch arm64 --os linux
 	docker manifest push --purge $(IMAGE):$(TAG)
+	docker manifest create $(IMAGE):latest $(IMAGE_AMD64) $(IMAGE_ARM64)
+	docker manifest annotate $(IMAGE):latest $(IMAGE_ARM64) --arch arm64 --os linux
 	docker manifest push --purge $(IMAGE):latest
 
 version: | svu ## tag a new version
