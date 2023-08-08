@@ -21,7 +21,7 @@ SVU_ARCH=all
 endif
 
 NEXT := next --force-patch-increment
-ifeq ($(GIT_BRANCH), $DEFAULT_BRANCH)
+ifeq ($(GIT_BRANCH), $(DEFAULT_BRANCH))
 SVU_OPTS := $(NEXT)
 else
 SVU_OPTS := current
