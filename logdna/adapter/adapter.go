@@ -131,9 +131,11 @@ func (adapter *Adapter) Stream(logstream chan *router.Message) {
 			)
 		} else {
 			adapter.Queue <- Line{
-				Line:      string(messageStr),
-				File:      m.Container.Name,
-				Timestamp: time.Now().Unix(),
+				Line: string(messageStr),
+				File: m.Container.Name,
+				// We're on a very old Go version, so can't use stdlib function
+				// https://stackoverflow.com/a/24122933
+				Timestamp: m.Time.UnixNano() / 1e6,
 			}
 		}
 	}
